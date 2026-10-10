@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { AppShell } from './components/layout/AppShell';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { Skeleton } from './components/ui/States';
 import { setUnauthorizedHandler } from './lib/api';
 import { useAuthMe } from './lib/queries';
@@ -52,17 +53,20 @@ export function App() {
 }
 
 function Lazy({ el }: { el: React.ReactNode }) {
+  const { pathname } = useLocation();
   return (
-    <Suspense
-      fallback={
-        <div className="grid gap-6">
-          <Skeleton className="h-10 w-64" />
-          <Skeleton className="h-72" />
-        </div>
-      }
-    >
-      {el}
-    </Suspense>
+    <ErrorBoundary resetKey={pathname}>
+      <Suspense
+        fallback={
+          <div className="grid gap-6">
+            <Skeleton className="h-10 w-64" />
+            <Skeleton className="h-72" />
+          </div>
+        }
+      >
+        {el}
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

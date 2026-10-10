@@ -61,7 +61,10 @@ const PUBLIC_PATHS = new Set(['/api/health', '/api/auth/login', '/api/auth/logou
 
 export async function registerAuth(app: FastifyInstance): Promise<void> {
   app.addHook('onRequest', async (req: FastifyRequest, reply: FastifyReply) => {
-    const path = req.url.split('?')[0]!;
+    // 命中 /api 路由时按路由判断：路由匹配前会先解码 %XX，原始 URL 形如 /%61pi/tickets 时同样会命中 /api/tickets。
+    // 其余情况（未匹配、静态资源通配路由）仍按原始路径判断。
+    const route = req.routeOptions.url;
+    const path = route?.startsWith('/api') ? route : req.url.split('?')[0]!;
     if (!path.toLowerCase().startsWith('/api') || PUBLIC_PATHS.has(path)) return;
     if (!isAuthenticated(req)) {
       return reply.code(401).send({ error: '未登录或登录已过期' });

@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import { ChevronDown, Search, X } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import type { Meta } from '@shared/contract';
 
 /** 筛选下拉：未选时为灰色文字按钮，选中后显示「标签：值」并可一键清除 */
 export function Select({
@@ -60,6 +61,11 @@ export function Select({
       </select>
     </span>
   );
+}
+
+/** 楼栋筛选（维修页、遗留攻坚页共用） */
+export function BuildingSelect({ meta, value, onChange }: { meta?: Meta; value: string; onChange: (v: string) => void }) {
+  return <Select value={value} onChange={onChange} placeholder="楼栋" label="楼栋" options={(meta?.buildings ?? []).map((b) => ({ value: b.code, label: b.name }))} />;
 }
 
 /** 防抖关键词输入（250ms） */

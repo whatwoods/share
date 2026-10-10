@@ -81,7 +81,7 @@ export default function EnergyPage() {
       )}
 
       <Section title="园区日用电" desc="kWh / 日 · 虚线为区间日均" className="mt-12">
-        <Loadable loading={ov.isLoading} fetching={ov.isFetching} error={ov.error} skeleton={<Skeleton className="h-[280px]" />}>
+        <Loadable query={ov} fetching={ov.isFetching} skeleton={<Skeleton className="h-[280px]" />}>
           {o && <EChart option={trendArea(o.daily, { color: C.accent, avgLine: true })} height={280} ariaLabel="园区日用电趋势" />}
         </Loadable>
       </Section>
@@ -113,7 +113,7 @@ export default function EnergyPage() {
           }
           flush
         >
-          <Loadable loading={bld.isLoading} fetching={bld.isFetching} error={bld.error} skeleton={<Skeleton className="mt-4 h-[420px]" />}>
+          <Loadable query={bld} fetching={bld.isFetching} skeleton={<Skeleton className="mt-4 h-[420px]" />}>
             <div className="scroll-thin overflow-x-auto">
               <Table className="min-w-[620px]">
                 <thead>
@@ -207,7 +207,7 @@ export default function EnergyPage() {
           />
         }
       >
-        <Loadable loading={hm.isLoading} fetching={hm.isFetching} error={hm.error} skeleton={<Skeleton className="h-[360px]" />}>
+        <Loadable query={hm} fetching={hm.isFetching} skeleton={<Skeleton className="h-[360px]" />}>
           {hm.data && <EChart option={heatmap(hm.data)} height={Math.max(260, hm.data.days.length * 20 + 70)} ariaLabel="峰谷热力图" />}
         </Loadable>
       </Section>
@@ -261,7 +261,7 @@ function CircuitLedger() {
         <SearchInput value={q} onChange={setQ} placeholder="回路名称 / 区域 / 变电所" />
         <span className="num ml-auto text-[13px] text-ink-3">{rows.length} 个回路</span>
       </div>
-      <Loadable loading={c.isLoading} error={c.error}>
+      <Loadable query={c}>
         <div className="scroll-thin max-h-[520px] overflow-auto">
           <Table className="min-w-[860px]">
             <thead>

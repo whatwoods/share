@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { useState } from 'react';
-import type { Meta, Ticket, TicketStats } from '@shared/contract';
+import type { Ticket, TicketStats } from '@shared/contract';
 import { EChart } from '@/components/charts/EChart';
 import { C } from '@/components/charts/echarts';
 import { categoryColumns, monthStack } from '@/components/charts/options';
@@ -11,13 +11,13 @@ import { TicketRow } from '@/components/tickets/TicketRow';
 import { Button } from '@/components/ui/Button';
 import { CopyButton } from '@/components/ui/Copy';
 import { DateRange } from '@/components/ui/DateRange';
-import { FilterBar, SearchInput, Select, Toggle } from '@/components/ui/Fields';
+import { BuildingSelect, FilterBar, SearchInput, Select, Toggle } from '@/components/ui/Fields';
 import { Meter } from '@/components/ui/Meter';
 import { Section } from '@/components/ui/Section';
 import { Segmented } from '@/components/ui/Segmented';
 import { Stat, StatRow } from '@/components/ui/Stat';
 import { OverdueText, StatusText } from '@/components/ui/Status';
-import { Empty, Loadable, Skeleton } from '@/components/ui/States';
+import { Empty, ErrorState, failedWithoutData, Loadable, Skeleton } from '@/components/ui/States';
 import { Table, Td, Th, Tr } from '@/components/ui/Table';
 import { Tabs } from '@/components/ui/Tabs';
 import { useToast } from '@/components/ui/Toast';
@@ -92,16 +92,17 @@ export default function RepairPage() {
         {tab === 'remind' && <RemindTab filter={filter} onOpen={setOpen} />}
         {tab === 'open' && <OpenTab filter={filter} onOpen={setOpen} />}
         {tab === 'all' && <AllTab filter={filter} s={s} set={set} onOpen={setOpen} />}
-        {tab === 'stats' && <StatsTab stats={stats.data} loading={stats.isLoading} fetching={stats.isFetching} onPick={patch} />}
+        {tab === 'stats' &&
+          (failedWithoutData(stats) ? (
+            <ErrorState error={stats.error} onRetry={() => void stats.refetch()} />
+          ) : (
+            <StatsTab stats={stats.data} loading={stats.isLoading} fetching={stats.isFetching} onPick={patch} />
+          ))}
       </div>
 
       <TicketDrawer ticket={open} onClose={() => setOpen(null)} />
     </div>
   );
-}
-
-export function BuildingSelect({ meta, value, onChange }: { meta?: Meta; value: string; onChange: (v: string) => void }) {
-  return <Select value={value} onChange={onChange} placeholder="楼栋" label="楼栋" options={(meta?.buildings ?? []).map((b) => ({ value: b.code, label: b.name }))} />;
 }
 
 /* ── 超时催办 ── */
@@ -129,7 +130,7 @@ function RemindTab({ filter, onOpen }: { filter: Query; onOpen: (t: Ticket) => v
         <span className="flex-1" />
         <CopyButton label="复制全部催办" text={copyAll} />
       </div>
-      <Loadable loading={list.isLoading} fetching={list.isFetching} skeleton={<Skeleton className="h-96" />}>
+      <Loadable query={list} fetching={list.isFetching} skeleton={<Skeleton className="h-96" />}>
         <div className="max-w-[960px]">
           <OverdueGroups tickets={items} onOpen={onOpen} limitPerGroup={12} />
         </div>
@@ -224,7 +225,7 @@ function AllTab({ filter, s, set, onOpen }: { filter: Query; s: S; set: SetS; on
           导出 Excel
         </Button>
       </div>
-      <Loadable loading={list.isLoading} fetching={list.isFetching} error={list.error}>
+      <Loadable query={list} fetching={list.isFetching}>
         <div className="scroll-thin overflow-x-auto">
           <Table className="min-w-[1000px]">
             <thead>

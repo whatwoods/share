@@ -56,6 +56,25 @@ test('鉴权：未登录 401；错误密码 401；登录后可访问', async () 
   assert.equal(forged.statusCode, 401);
 });
 
+test('鉴权：URL 编码的 /api 路径同样需要登录', async () => {
+  // 路由匹配前会解码 %XX，这些请求都会命中 /api/* 路由
+  const cases: [method: 'GET' | 'HEAD' | 'POST', url: string][] = [
+    ['GET', '/%61pi/tickets'],
+    ['GET', '/%61%70%69/meta'],
+    ['GET', '/api/%74ickets'],
+    ['GET', '/%61pi/tickets/export'],
+    ['GET', '/%61pi/legacy/export'],
+    ['HEAD', '/%61pi/legacy'],
+    ['POST', '/%61pi/sync'],
+  ];
+  for (const [method, url] of cases) {
+    const r = await app.inject({ method, url });
+    assert.equal(r.statusCode, 401, `${method} ${url}`);
+  }
+  // 公开接口编码后仍然公开
+  assert.equal((await get('/%61pi/health', false)).statusCode, 200);
+});
+
 test('Meta / 工单 / 看板 / 统计', async () => {
   const meta = (await get('/api/meta')).json();
   assert.equal(meta.buildings.length, 20);

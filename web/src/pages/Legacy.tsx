@@ -6,10 +6,10 @@ import { LegacyDrawer } from '@/components/legacy/LegacyDrawer';
 import { LegacyRow } from '@/components/legacy/LegacyRow';
 import { Button } from '@/components/ui/Button';
 import { CopyButton } from '@/components/ui/Copy';
-import { FilterBar, SearchInput, Select, Toggle } from '@/components/ui/Fields';
+import { BuildingSelect, FilterBar, SearchInput, Select, Toggle } from '@/components/ui/Fields';
 import { Section } from '@/components/ui/Section';
 import { Stat, StatRow } from '@/components/ui/Stat';
-import { Empty, Loadable, Skeleton } from '@/components/ui/States';
+import { Empty, ErrorState, failedWithoutData, Loadable, Skeleton, type QueryState } from '@/components/ui/States';
 import { Table, Td, Th, Tr } from '@/components/ui/Table';
 import { Tabs } from '@/components/ui/Tabs';
 import { useToast } from '@/components/ui/Toast';
@@ -18,7 +18,6 @@ import { buildingName } from '@/lib/buildings';
 import { fmtDays, fmtInt, ymd } from '@/lib/format';
 import { useLegacy, useLegacySummary, useMeta } from '@/lib/queries';
 import { useUrlState } from '@/lib/url-state';
-import { BuildingSelect } from './Repair';
 
 const KEYS = ['group', 'status', 'building', 'q', 'all'] as const;
 const ORDER: LegacyGroup[] = ['DECAI', 'SCG', 'QIJU', 'LEAK', 'DISPUTE', 'OTHER'];
@@ -85,8 +84,8 @@ export default function LegacyPage() {
       </StatRow>
 
       <div className="mt-14 grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <Radar summary={sm} loading={summary.isLoading} onOpen={setOpen} />
-        <UnitTable groups={groups} loading={summary.isLoading} active={s.group} onPick={(k) => set({ group: s.group === k ? null : k })} onExport={doExport} exporting={exporting} />
+        <Radar summary={sm} query={summary} onOpen={setOpen} />
+        <UnitTable groups={groups} query={summary} active={s.group} onPick={(k) => set({ group: s.group === k ? null : k })} onExport={doExport} exporting={exporting} />
       </div>
 
       <Section
@@ -117,7 +116,7 @@ export default function LegacyPage() {
           <SearchInput value={s.q} onChange={(v) => set({ q: v })} placeholder="搜索问题 / 进展 / 卡点" />
           <Toggle checked={s.all === '1'} onChange={(v) => set({ all: v ? '1' : null })} label="包含已完成" />
         </FilterBar>
-        <Loadable loading={list.isLoading} fetching={list.isFetching} error={list.error} className="mt-3">
+        <Loadable query={list} fetching={list.isFetching} className="mt-3">
           {items.length === 0 ? (
             <Empty title="没有符合条件的遗留问题" />
           ) : s.group ? (
@@ -137,10 +136,12 @@ export default function LegacyPage() {
   );
 }
 
-function Radar({ summary, loading, onOpen }: { summary?: LegacySummary; loading: boolean; onOpen: (i: LegacyItem) => void }) {
+function Radar({ summary, query, onOpen }: { summary?: LegacySummary; query: QueryState; onOpen: (i: LegacyItem) => void }) {
   return (
     <Section title="高危隐患" count={summary?.radar.length} desc="外立面玻璃、排污堵塞、重复渗漏、责任未定等硬骨头，按风险分排序">
-      {loading ? (
+      {failedWithoutData(query) ? (
+        <ErrorState error={query.error} onRetry={() => void query.refetch()} />
+      ) : query.isLoading ? (
         <Skeleton className="h-72" />
       ) : summary?.radar.length ? (
         <ol>
@@ -172,14 +173,14 @@ function Radar({ summary, loading, onOpen }: { summary?: LegacySummary; loading:
 
 function UnitTable({
   groups,
-  loading,
+  query,
   active,
   onPick,
   onExport,
   exporting,
 }: {
   groups: LegacySummary['groups'];
-  loading: boolean;
+  query: QueryState;
   active: string;
   onPick: (k: string) => void;
   onExport: (k: string) => void;
@@ -187,7 +188,9 @@ function UnitTable({
 }) {
   return (
     <Section title="按施工单位对账" desc="点击行切换下方清单 · 每个单位可单独导出索赔清单" flush>
-      {loading ? (
+      {failedWithoutData(query) ? (
+        <ErrorState error={query.error} onRetry={() => void query.refetch()} className="mt-4" />
+      ) : query.isLoading ? (
         <Skeleton className="mt-4 h-60" />
       ) : (
         <Table>

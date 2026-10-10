@@ -12,7 +12,7 @@ import { Section } from '@/components/ui/Section';
 import { Sparkline } from '@/components/ui/Sparkline';
 import { Stat, StatRow } from '@/components/ui/Stat';
 import { Dot } from '@/components/ui/Status';
-import { Loadable, Skeleton } from '@/components/ui/States';
+import { failedWithoutData, Loadable, Skeleton } from '@/components/ui/States';
 import { energyAnomalies } from '@/lib/anomaly';
 import { buildingShort } from '@/lib/buildings';
 import { fmtDays, fmtInt, safeBoldHtml, ymd } from '@/lib/format';
@@ -37,6 +37,8 @@ export default function HomePage() {
   const flagged = anomalies.filter((a) => a.flagged);
   const red = redCount.data?.total;
   const high = legacy.data?.radar.length;
+  // 标题依赖的两项数据任一失败时不再一直显示骨架
+  const headFailed = failedWithoutData(redCount) || failedWithoutData(legacy);
 
   const copyAll = () => {
     const ts = overdue.data?.items ?? [];
@@ -49,7 +51,22 @@ export default function HomePage() {
     <div>
       <Greeting />
       <h1 className="mt-1 max-w-[880px] text-h1 font-semibold tight text-ink-1 max-md:text-[21px] max-md:leading-8">
-        {red == null || high == null ? (
+        {headFailed ? (
+          <span className="text-ink-2">
+            今日概况没有加载出来，
+            <button
+              type="button"
+              className="underline decoration-line-strong underline-offset-[6px] hover:text-ink-1"
+              onClick={() => {
+                if (failedWithoutData(redCount)) void redCount.refetch();
+                if (failedWithoutData(legacy)) void legacy.refetch();
+              }}
+            >
+              点此重试
+            </button>
+            。
+          </span>
+        ) : red == null || high == null ? (
           <span className="skeleton inline-block h-8 w-[520px] max-w-full align-middle" />
         ) : red + high + flagged.length === 0 ? (
           '园区运行平稳，今天没有需要特别跟进的事项。'
@@ -67,12 +84,12 @@ export default function HomePage() {
       </h1>
 
       <StatRow className="mt-8 grid-cols-2 lg:grid-cols-4">
-        <Stat label="超时工单" tone="crit" value={fmtInt(red)} unit="单" sub={`另有临期 ${fmtInt(yellowCount.data?.total)} 单`} loading={red == null} onClick={() => document.getElementById('overdue')?.scrollIntoView({ behavior: 'smooth' })} />
+        <Stat label="超时工单" tone="crit" value={fmtInt(red)} unit="单" sub={`另有临期 ${fmtInt(yellowCount.data?.total)} 单`} loading={redCount.isLoading} onClick={() => document.getElementById('overdue')?.scrollIntoView({ behavior: 'smooth' })} />
         <Stat label="高危遗留" tone="violet" value={fmtInt(high)} unit="项" sub={legacy.data && `遗留未闭环共 ${legacy.data.open} 项`} loading={legacy.isLoading} onClick={() => navigate('/legacy')} />
         <Stat
           label="用电异常楼栋"
           tone="warn"
-          value={buildings.isLoading ? '' : flagged.length}
+          value={buildings.data ? flagged.length : '—'}
           unit="栋"
           sub="昨日较同类日均偏差 ≥ 15%"
           loading={buildings.isLoading}
@@ -101,7 +118,7 @@ export default function HomePage() {
             </>
           }
         >
-          <Loadable loading={overdue.isLoading} fetching={overdue.isFetching} skeleton={<Skeleton className="h-80" />}>
+          <Loadable query={overdue} fetching={overdue.isFetching} skeleton={<Skeleton className="h-80" />}>
             <OverdueGroups tickets={overdue.data?.items ?? []} onOpen={setTicket} />
           </Loadable>
         </Section>
@@ -113,7 +130,7 @@ export default function HomePage() {
             desc="昨日电量 vs 近两周同类日（工作日 / 周末）均值"
             actions={<MoreLink to="/energy">能耗</MoreLink>}
           >
-            <Loadable loading={buildings.isLoading} skeleton={<Skeleton className="h-56" />}>
+            <Loadable query={buildings} skeleton={<Skeleton className="h-56" />}>
               <div>
                 {anomalies.slice(0, 6).map((a) => (
                   <button
@@ -141,7 +158,7 @@ export default function HomePage() {
           </Section>
 
           <Section title="高危遗留" count={high} desc="施工遗留中风险最高的硬骨头" actions={<MoreLink to="/legacy">遗留攻坚</MoreLink>}>
-            <Loadable loading={legacy.isLoading} skeleton={<Skeleton className="h-56" />}>
+            <Loadable query={legacy} skeleton={<Skeleton className="h-56" />}>
               <div>
                 {legacy.data?.radar.slice(0, 6).map((l) => (
                   <button

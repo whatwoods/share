@@ -14,7 +14,7 @@ import { Section } from '@/components/ui/Section';
 import { Segmented } from '@/components/ui/Segmented';
 import { Sparkline } from '@/components/ui/Sparkline';
 import { Stat } from '@/components/ui/Stat';
-import { Empty, Loadable, Skeleton } from '@/components/ui/States';
+import { Empty, ErrorState, failedWithoutData, Loadable, Skeleton } from '@/components/ui/States';
 import { Table, Td, Th, Tr } from '@/components/ui/Table';
 import { Tabs } from '@/components/ui/Tabs';
 import { fmtInt, fmtPct, splitCompact } from '@/lib/format';
@@ -61,7 +61,13 @@ export default function BuildingsPage() {
 
       <div className="mt-6 grid gap-x-10 gap-y-10 xl:grid-cols-[minmax(0,1.5fr)_minmax(380px,1fr)]">
         <div className="min-w-0">
-          {overview.isLoading ? <Skeleton className="aspect-[16/8.4] w-full" /> : <ParkMap items={items} selected={selected} onSelect={(c) => setUrl({ b: c })} metric={metric} />}
+          {failedWithoutData(overview) ? (
+            <ErrorState error={overview.error} onRetry={() => void overview.refetch()} />
+          ) : overview.isLoading ? (
+            <Skeleton className="aspect-[16/8.4] w-full" />
+          ) : (
+            <ParkMap items={items} selected={selected} onSelect={(c) => setUrl({ b: c })} metric={metric} />
+          )}
 
           <Section title="楼栋一览" className="mt-10" flush>
             <div className="scroll-thin overflow-x-auto">
@@ -92,7 +98,7 @@ export default function BuildingsPage() {
                 能耗详情 →
               </Link>
             </div>
-            <Loadable loading={detail.isLoading} fetching={detail.isFetching} skeleton={<Skeleton className="mt-2 h-[150px]" />}>
+            <Loadable query={detail} fetching={detail.isFetching} skeleton={<Skeleton className="mt-2 h-[150px]" />}>
               {d?.energy.trend.length ? (
                 <EChart option={trendArea(d.energy.trend, { color: C.accent, avgLine: true })} height={150} ariaLabel="楼栋日用电趋势" />
               ) : (
@@ -111,7 +117,7 @@ export default function BuildingsPage() {
             ]}
           />
           <div className="scroll-thin max-h-[440px] overflow-y-auto pt-2 xl:max-h-[calc(100dvh-560px)] xl:min-h-[220px]">
-            <Loadable loading={detail.isLoading} fetching={detail.isFetching}>
+            <Loadable query={detail} fetching={detail.isFetching}>
               {tab === 'tickets' ? (
                 d?.tickets.open.length ? (
                   <>
