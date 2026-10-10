@@ -1,180 +1,68 @@
 import clsx from 'clsx';
-import { Building2, ChevronsLeft, ChevronsRight, Construction, Database, LayoutDashboard, LogOut, RefreshCw, Wrench, Zap } from 'lucide-react';
-import { useEffect, useState, type ReactNode } from 'react';
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
+import { LogOut, Presentation, RefreshCw, Search } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, Outlet, useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { fmtRelative } from '@/lib/format';
 import { useAuthMe, useMeta, useSyncNow, useSyncStatus } from '@/lib/queries';
 import { Button } from '../ui/Button';
 import { useToast } from '../ui/Toast';
+import { CommandPalette } from './CommandPalette';
 
-const NAV: { to: string; label: string; icon: ReactNode; color: string; desc: string }[] = [
-  { to: '/', label: '运营总览', icon: <LayoutDashboard />, color: '#93a4bf', desc: '跨域驾驶舱' },
-  { to: '/buildings', label: '楼宇全景', icon: <Building2 />, color: '#22b3cf', desc: '1~19号楼 · 公区' },
-  { to: '/energy', label: '能耗监控', icon: <Zap />, color: '#5b9cf0', desc: 'CET 电表 · 光伏' },
-  { to: '/repair', label: '设施维修', icon: <Wrench />, color: '#2fc28f', desc: '日常报修流水' },
-  { to: '/legacy', label: '施工遗留攻坚', icon: <Construction />, color: '#8c7ff0', desc: '索赔与质保专项' },
+export const NAV = [
+  { to: '/', label: '今日' },
+  { to: '/buildings', label: '楼宇' },
+  { to: '/energy', label: '能耗' },
+  { to: '/repair', label: '维修' },
+  { to: '/legacy', label: '遗留攻坚' },
 ];
 
-export const PAGE_TITLES: Record<string, string> = {
-  '/': '运营总览',
-  '/buildings': '楼宇全景',
-  '/energy': '能耗监控',
-  '/repair': '设施维修运维',
-  '/legacy': '施工遗留攻坚',
-};
-
-function readCollapsed() {
-  try {
-    return localStorage.getItem('nav-collapsed') === '1';
-  } catch {
-    return false;
-  }
-}
-
 export function AppShell() {
-  const [collapsed, setCollapsed] = useState(readCollapsed);
+  const [palette, setPalette] = useState(false);
   useEffect(() => {
-    try {
-      localStorage.setItem('nav-collapsed', collapsed ? '1' : '0');
-    } catch {
-      /* ignore */
-    }
-  }, [collapsed]);
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setPalette((v) => !v);
+      } else if (e.key === '/' && !/input|textarea|select/i.test((e.target as HTMLElement).tagName)) {
+        e.preventDefault();
+        setPalette(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
-    <div className="flex h-dvh overflow-hidden">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((c) => !c)} />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Topbar />
-        <main className="scroll-thin flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] px-6 pt-5 pb-10 max-md:px-4">
-            <Outlet />
-          </div>
-        </main>
-      </div>
+    <div className="min-h-dvh">
+      <TopBar onSearch={() => setPalette(true)} />
+      <main className="mx-auto w-full max-w-[1320px] px-8 pt-8 pb-20 max-md:px-4 max-md:pt-5">
+        <Outlet />
+      </main>
+      <CommandPalette open={palette} onClose={() => setPalette(false)} />
     </div>
   );
 }
 
-function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) {
-  const meta = useMeta();
-  const mode = meta.data?.dataMode;
-  return (
-    <aside
-      className={clsx(
-        'relative flex shrink-0 flex-col bg-nav text-white/80 transition-[width] duration-200 max-md:hidden',
-        collapsed ? 'w-16' : 'w-[232px]',
-      )}
-    >
-      <div className={clsx('flex h-14 items-center gap-2.5 border-b border-white/[.06]', collapsed ? 'justify-center' : 'px-5')}>
-        <Logo />
-        {!collapsed && (
-          <div className="min-w-0 leading-tight">
-            <div className="truncate text-[14px] font-semibold tracking-wide text-white">湾谷运营工作台</div>
-            <div className="truncate text-[11px] text-white/45">Wangu Park Ops Console</div>
-          </div>
-        )}
-      </div>
-      <nav className="flex-1 space-y-0.5 px-2.5 py-4">
-        {!collapsed && <div className="px-2.5 pb-2 text-[11px] font-medium tracking-wider text-white/35">工作台</div>}
-        {NAV.map((n) => (
-          <NavLink
-            key={n.to}
-            to={n.to}
-            end={n.to === '/'}
-            title={collapsed ? n.label : undefined}
-            className={({ isActive }) =>
-              clsx(
-                'group relative flex h-10 items-center gap-3 rounded-[9px] text-[13px] transition-colors',
-                collapsed ? 'justify-center' : 'px-3',
-                isActive ? 'bg-white/[.08] font-medium text-white' : 'text-white/65 hover:bg-white/[.04] hover:text-white',
-              )
-            }
-          >
-            {({ isActive }) => (
-              <>
-                {isActive && <span className="absolute top-2 bottom-2 left-0 w-[3px] rounded-r-full" style={{ background: n.color }} />}
-                <span className="[&_svg]:size-[18px]" style={{ color: isActive ? n.color : undefined }}>
-                  {n.icon}
-                </span>
-                {!collapsed && (
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate">{n.label}</span>
-                  </span>
-                )}
-              </>
-            )}
-          </NavLink>
-        ))}
-      </nav>
-      {!collapsed && mode && (
-        <div className="mx-3 mb-3 rounded-[10px] border border-white/[.06] bg-white/[.03] p-3 text-[11px]">
-          <div className="mb-2 flex items-center gap-1.5 font-medium text-white/50">
-            <Database className="size-3" />
-            数据源
-          </div>
-          <SourceRow label="飞书多维表格" mode={mode.feishu} />
-          <SourceRow label="CET 能耗服务" mode={mode.energy} />
-        </div>
-      )}
-      <button
-        onClick={onToggle}
-        aria-label={collapsed ? '展开导航' : '收起导航'}
-        className="flex h-10 items-center justify-center gap-2 border-t border-white/[.06] text-[12px] text-white/40 hover:text-white/80"
-      >
-        {collapsed ? <ChevronsRight className="size-4" /> : <ChevronsLeft className="size-4" />}
-        {!collapsed && '收起'}
-      </button>
-    </aside>
-  );
-}
-
-function SourceRow({ label, mode }: { label: string; mode: 'live' | 'mock' }) {
-  return (
-    <div className="flex items-center justify-between py-0.5">
-      <span className="text-white/60">{label}</span>
-      <span className={clsx('inline-flex items-center gap-1', mode === 'live' ? 'text-[#5fd39a]' : 'text-[#f5c45e]')}>
-        <span className={clsx('size-1.5 rounded-full', mode === 'live' ? 'bg-[#5fd39a]' : 'bg-[#f5c45e]')} />
-        {mode === 'live' ? '实时' : '演示数据'}
-      </span>
-    </div>
-  );
-}
-
-function Logo() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden className="shrink-0">
-      <rect width="32" height="32" rx="8" fill="#1b2740" />
-      <path d="M7 22V12l5 4 4-6 4 6 5-4v10z" fill="#3987e5" />
-      <path d="M7 22h18v2H7z" fill="#2fc28f" />
-    </svg>
-  );
-}
-
-function Topbar() {
-  const { pathname } = useLocation();
-  const title = PAGE_TITLES[pathname] ?? '湾谷运营工作台';
+function TopBar({ onSearch }: { onSearch: () => void }) {
   const status = useSyncStatus();
   const sync = useSyncNow();
   const toast = useToast();
   const me = useAuthMe();
+  const meta = useMeta();
   const qc = useQueryClient();
   const navigate = useNavigate();
   const running = sync.isPending || status.data?.running;
   const last = status.data?.last;
+  const mock = meta.data && (meta.data.dataMode.feishu === 'mock' || meta.data.dataMode.energy === 'mock');
 
   const onSync = () =>
     sync.mutate(undefined, {
       onSuccess: (r) => {
         if (!r.ok) return toast({ kind: 'error', title: '同步失败', body: r.message });
         const sum = (k: 'inserted' | 'updated' | 'deleted') => r.tables.reduce((a, t) => a + t[k], 0);
-        toast({
-          kind: 'success',
-          title: '同步完成',
-          body: `新增 ${sum('inserted')} · 更新 ${sum('updated')} · 删除 ${sum('deleted')}，用时 ${(r.durationMs / 1000).toFixed(1)}s`,
-        });
+        toast({ kind: 'success', title: '同步完成', body: `新增 ${sum('inserted')} · 更新 ${sum('updated')} · 删除 ${sum('deleted')}` });
       },
       onError: (e) => toast({ kind: 'error', title: '同步失败', body: e.message }),
     });
@@ -186,41 +74,61 @@ function Topbar() {
   };
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-4 border-b border-line bg-surface/90 px-6 backdrop-blur max-md:px-4">
-      <MobileNav />
-      <h1 className="min-w-0 flex-1 truncate text-[16px] max-md:invisible font-semibold text-ink-1">{title}</h1>
-      <div className="hidden items-center gap-1.5 text-caption text-ink-3 sm:flex" title={last?.message}>
-        <span className={clsx('size-1.5 rounded-full', last ? (last.ok ? 'bg-good' : 'bg-crit') : 'bg-ink-4')} />
-        {running ? '正在同步…' : `上次同步 ${fmtRelative(last?.finishedAt ?? last?.startedAt)}`}
+    <header className="sticky top-0 z-30 border-b border-line bg-white/85 backdrop-blur-md">
+      <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-6 px-8 max-md:gap-3 max-md:px-4">
+        <Link to="/" className="flex shrink-0 items-center gap-2">
+          <Logo />
+          <span className="text-[15px] font-semibold tracking-tight max-sm:hidden">湾谷运营</span>
+        </Link>
+        <nav className="scroll-thin flex min-w-0 items-center gap-1 overflow-x-auto">
+          {NAV.map((n) => (
+            <NavLink
+              key={n.to}
+              to={n.to}
+              end={n.to === '/'}
+              className={({ isActive }) =>
+                clsx(
+                  'rounded-md px-2.5 py-1.5 text-[14px] whitespace-nowrap transition-colors',
+                  isActive ? 'bg-hover font-medium text-ink-1' : 'text-ink-3 hover:text-ink-1',
+                )
+              }
+            >
+              {n.label}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="flex-1" />
+        <button
+          onClick={onSearch}
+          className="flex h-8 w-[220px] items-center gap-2 rounded-md px-2.5 text-[13px] text-ink-3 shadow-[inset_0_0_0_1px_var(--color-line-strong)] transition-colors hover:bg-subtle max-lg:w-8 max-lg:justify-center max-lg:px-0"
+        >
+          <Search className="size-3.5 shrink-0" />
+          <span className="flex-1 text-left max-lg:hidden">搜索工单、遗留、楼栋</span>
+          <span className="kbd max-lg:hidden">⌘K</span>
+        </button>
+        <div className="flex items-center gap-1">
+          {mock && (
+            <span className="mr-1 rounded-[5px] bg-warn-soft px-1.5 py-0.5 text-[11px] font-medium text-warn-ink max-md:hidden" title="未接入真实数据源，当前为演示数据">
+              演示数据
+            </span>
+          )}
+          <span className="mr-1 text-[12px] text-ink-3 max-xl:hidden" title={last?.message}>
+            {running ? '同步中…' : `同步于 ${fmtRelative(last?.finishedAt ?? last?.startedAt)}`}
+          </span>
+          <Button variant="ghost" loading={!!running} icon={<RefreshCw />} onClick={onSync} title="立即同步飞书数据" aria-label="立即同步" />
+          <Button variant="ghost" icon={<Presentation />} onClick={() => navigate('/report')} title="汇报模式（适合投屏）" aria-label="汇报模式" />
+          {me.data?.authEnabled && <Button variant="ghost" icon={<LogOut />} onClick={logout} title="退出登录" aria-label="退出登录" />}
+        </div>
       </div>
-      <Button variant="primary" size="md" loading={!!running} icon={<RefreshCw className="size-3.5" />} onClick={onSync} disabled={!!running}>
-        立即同步
-      </Button>
-      {me.data?.authEnabled && (
-        <Button variant="ghost" size="md" icon={<LogOut className="size-3.5" />} onClick={logout} aria-label="退出登录">
-          <span className="max-lg:hidden">退出</span>
-        </Button>
-      )}
     </header>
   );
 }
 
-/** 小屏：顶部下拉导航 */
-function MobileNav() {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
+export function Logo({ size = 22 }: { size?: number }) {
   return (
-    <select
-      className="field md:hidden"
-      value={NAV.some((n) => n.to === pathname) ? pathname : '/'}
-      onChange={(e) => navigate(e.target.value)}
-      aria-label="切换页面"
-    >
-      {NAV.map((n) => (
-        <option key={n.to} value={n.to}>
-          {n.label}
-        </option>
-      ))}
-    </select>
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden className="shrink-0">
+      <rect width="24" height="24" rx="6" fill="#171717" />
+      <path d="M5.5 17V9.5l3.5 3 3-4.5 3 4.5 3.5-3V17z" fill="#fff" />
+    </svg>
   );
 }

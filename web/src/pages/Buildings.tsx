@@ -1,36 +1,30 @@
 import clsx from 'clsx';
-import { ArrowRight, Building2, Construction, Wrench, Zap } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router';
 import type { BuildingCard, LegacyItem, Ticket } from '@shared/contract';
-import { ParkMap, rampFor, type MapMetric } from '@/components/buildings/ParkMap';
+import { MapLegend, ParkMap, type MapMetric } from '@/components/buildings/ParkMap';
 import { EChart } from '@/components/charts/EChart';
 import { C } from '@/components/charts/echarts';
 import { trendArea } from '@/components/charts/options';
-import { LegacyCard } from '@/components/legacy/LegacyCard';
 import { LegacyDrawer } from '@/components/legacy/LegacyDrawer';
-import { TicketCard } from '@/components/tickets/TicketCard';
+import { LegacyRow } from '@/components/legacy/LegacyRow';
 import { TicketDrawer } from '@/components/tickets/TicketDrawer';
-import { HealthBadge } from '@/components/ui/Badge';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { TicketRow } from '@/components/tickets/TicketRow';
+import { Section } from '@/components/ui/Section';
 import { Segmented } from '@/components/ui/Segmented';
 import { Sparkline } from '@/components/ui/Sparkline';
+import { Stat } from '@/components/ui/Stat';
 import { Empty, Loadable, Skeleton } from '@/components/ui/States';
 import { Table, Td, Th, Tr } from '@/components/ui/Table';
-import { fmtCompact, fmtInt, fmtPct } from '@/lib/format';
+import { Tabs } from '@/components/ui/Tabs';
+import { fmtInt, fmtPct, splitCompact } from '@/lib/format';
 import { useBuildingDetail, useBuildingsOverview } from '@/lib/queries';
 import { useUrlState } from '@/lib/url-state';
 
-const METRICS: { value: MapMetric; label: string }[] = [
-  { value: 'health', label: '综合健康' },
-  { value: 'energy', label: '近30天电耗' },
-  { value: 'tickets', label: '未完成报修' },
-  { value: 'legacy', label: '遗留缺陷' },
-];
-
 export default function BuildingsPage() {
-  const [url, setUrl] = useUrlState(['b', 'm'] as const);
-  const metric = (url.m || 'health') as MapMetric;
+  const [url, setUrl] = useUrlState(['b', 'm', 'tab'] as const);
+  const metric = (url.m || 'status') as MapMetric;
+  const tab = (url.tab || 'tickets') as 'tickets' | 'legacy';
   const overview = useBuildingsOverview();
   const items = overview.data?.items ?? [];
 
@@ -44,139 +38,105 @@ export default function BuildingsPage() {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [legacy, setLegacy] = useState<LegacyItem | null>(null);
   const card = items.find((b) => b.code === selected);
+  const d = detail.data;
+  const openLegacy = d?.legacy.filter((x) => x.isOpen) ?? [];
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <Segmented value={metric} onChange={(m) => setUrl({ m: m === 'health' ? null : m })} options={METRICS} />
-        <MapLegend metric={metric} />
-        <span className="ml-auto text-caption text-ink-3 max-lg:hidden">红色角标 = 超时工单 · 紫色角标 = 高危遗留 · 楼块厚度 = 近 30 天电量</span>
-      </div>
-
-      <div className="grid gap-4 xl:grid-cols-12">
-        <Card className="xl:col-span-8">
-          <CardBody className="pt-5">
-            {overview.isLoading ? (
-              <Skeleton className="aspect-[16/8.4] w-full" />
-            ) : (
-              <ParkMap items={items} selected={selected} onSelect={(c) => setUrl({ b: c })} metric={metric} />
-            )}
-          </CardBody>
-        </Card>
-
-        <Card className="flex flex-col xl:col-span-4">
-          <div className="flex items-center gap-3 px-5 pt-5">
-            <div className="grid size-10 place-items-center rounded-[11px] bg-building-soft text-building">
-              <Building2 className="size-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="text-[18px] font-semibold text-ink-1">{card?.name ?? detail.data?.building.name ?? '—'}</h2>
-                {card && <HealthBadge health={card.health} />}
-              </div>
-              <p className="text-caption text-ink-3">
-                {card?.kind === 'office' ? '研发办公' : card?.kind === 'apartment' ? '公寓及配套研发办公' : card?.kind === 'public' ? '公共区域 · 设备用房' : ''}
-              </p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-px overflow-hidden border-y border-line bg-line mt-4">
-            <Stat icon={<Zap />} label="近 30 天电量" value={fmtCompact(card?.energy.kwh30d)} unit="kWh" tone="energy" />
-            <Stat icon={<Zap />} label="昨日电量" value={fmtInt(card?.energy.yesterdayKwh)} unit="kWh" tone="energy" />
-            <Stat
-              icon={<Wrench />}
-              label="未完成报修"
-              value={fmtInt(card?.tickets.open)}
-              unit="单"
-              tone="repair"
-              note={card && (card.tickets.red || card.tickets.yellow) ? `超时 ${card.tickets.red} · 临期 ${card.tickets.yellow}` : undefined}
-              noteTone={card?.tickets.red ? 'crit' : 'warn'}
-            />
-            <Stat
-              icon={<Construction />}
-              label="遗留缺陷"
-              value={fmtInt(card?.legacy.open)}
-              unit="项"
-              tone="legacy"
-              note={card?.legacy.highRisk ? `高危 ${card.legacy.highRisk}` : undefined}
-              noteTone="crit"
-            />
-          </div>
-          <div className="flex-1 px-3 pt-3 pb-2">
-            <div className="px-2 text-caption font-medium text-ink-2">近 30 天日电耗</div>
-            <Loadable loading={detail.isLoading} fetching={detail.isFetching} skeleton={<Skeleton className="m-2 h-[180px]" />}>
-              {detail.data?.energy.trend.length ? (
-                <EChart option={trendArea(detail.data.energy.trend, { color: C.energy, avgLine: true })} height={180} ariaLabel="楼栋日电耗趋势" />
-              ) : (
-                <Empty title="暂无能耗数据" hint="能耗服务未返回该楼栋数据" className="py-8" />
-              )}
-            </Loadable>
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader
-            icon={<Wrench className="size-4" />}
-            title={`未完成报修 · ${card?.name ?? ''}`}
-            subtitle={
-              detail.data
-                ? `共 ${detail.data.tickets.stats.total} 单，闭环率 ${fmtPct(detail.data.tickets.stats.rate)}，按超时严重度排序`
-                : undefined
-            }
-            actions={
-              <Link to={`/repair?view=list&building=${selected}`} className="inline-flex items-center gap-1 text-caption font-medium text-brand-ink hover:underline">
-                全部工单 <ArrowRight className="size-3" />
-              </Link>
-            }
-          />
-          <CardBody>
-            <Loadable loading={detail.isLoading} fetching={detail.isFetching}>
-              {detail.data?.tickets.open.length ? (
-                <div className="scroll-thin grid max-h-[420px] gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
-                  {detail.data.tickets.open.slice(0, 30).map((t) => (
-                    <TicketCard key={t.id} t={t} onOpen={setTicket} />
-                  ))}
-                </div>
-              ) : (
-                <Empty title="该楼栋暂无未完成报修" hint="所有工单均已闭环" />
-              )}
-            </Loadable>
-          </CardBody>
-        </Card>
-        <Card>
-          <CardHeader
-            icon={<Construction className="size-4" />}
-            title={`施工遗留缺陷 · ${card?.name ?? ''}`}
-            subtitle={detail.data ? `共 ${detail.data.legacy.length} 项，未完成 ${detail.data.legacy.filter((x) => x.isOpen).length} 项，按风险排序` : undefined}
-            actions={
-              <Link to={`/legacy?building=${selected}`} className="inline-flex items-center gap-1 text-caption font-medium text-brand-ink hover:underline">
-                攻坚台账 <ArrowRight className="size-3" />
-              </Link>
-            }
-          />
-          <CardBody>
-            <Loadable loading={detail.isLoading} fetching={detail.isFetching}>
-              {detail.data?.legacy.length ? (
-                <div className="scroll-thin grid max-h-[420px] gap-2 overflow-y-auto pr-1">
-                  {detail.data.legacy.map((i) => (
-                    <LegacyCard key={i.id} item={i} onOpen={setLegacy} compact />
-                  ))}
-                </div>
-              ) : (
-                <Empty title="该楼栋无施工遗留问题" />
-              )}
-            </Loadable>
-          </CardBody>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader title="楼栋一览" subtitle="全部 19 栋楼及公区 · 点击行切换上方联动视图" />
-        <div className="scroll-thin overflow-x-auto pb-2">
-          <BuildingTable items={items} selected={selected} onSelect={(c) => (setUrl({ b: c }), window.scrollTo({ top: 0, behavior: 'smooth' }))} />
+    <div>
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="flex-1">
+          <h1 className="text-h1 font-semibold tight">楼宇</h1>
+          <p className="mt-1 text-[14px] text-ink-3">1~19 号楼及公区 · 点选楼栋查看用电、在途报修与施工遗留</p>
         </div>
-      </Card>
+        <MapLegend metric={metric} />
+        <Segmented
+          value={metric}
+          onChange={(m) => setUrl({ m: m === 'status' ? null : m })}
+          options={[
+            { value: 'status', label: '问题分布' },
+            { value: 'energy', label: '用电强度' },
+          ]}
+        />
+      </div>
+
+      <div className="mt-6 grid gap-x-10 gap-y-10 xl:grid-cols-[minmax(0,1.5fr)_minmax(380px,1fr)]">
+        <div className="min-w-0">
+          {overview.isLoading ? <Skeleton className="aspect-[16/8.4] w-full" /> : <ParkMap items={items} selected={selected} onSelect={(c) => setUrl({ b: c })} metric={metric} />}
+
+          <Section title="楼栋一览" className="mt-10" flush>
+            <div className="scroll-thin overflow-x-auto">
+              <BuildingTable items={items} selected={selected} onSelect={(c) => (setUrl({ b: c }), window.scrollTo({ top: 0, behavior: 'smooth' }))} />
+            </div>
+          </Section>
+        </div>
+
+        <aside className="min-w-0 xl:sticky xl:top-20 xl:self-start">
+          <div className="flex items-baseline gap-3">
+            <h2 className="text-[28px] leading-9 font-semibold tight">{card?.name ?? d?.building.name ?? '—'}</h2>
+            <span className="text-[14px] text-ink-3">
+              {card?.kind === 'office' ? '研发办公' : card?.kind === 'apartment' ? '公寓及配套' : card?.kind === 'public' ? '公共区域 · 设备用房' : ''}
+            </span>
+          </div>
+
+          <div className="mt-5 grid grid-cols-4 gap-4 border-y border-line py-4">
+            <Stat size="md" label="近30天" value={splitCompact(card?.energy.kwh30d, 'kWh').value} unit={splitCompact(card?.energy.kwh30d, 'kWh').unit} />
+            <Stat size="md" label="昨日" value={fmtInt(card?.energy.yesterdayKwh)} unit="kWh" />
+            <Stat size="md" label="在途报修" value={fmtInt(card?.tickets.open)} tone={card?.tickets.red ? 'crit' : undefined} sub={card?.tickets.red ? `超时 ${card.tickets.red}` : undefined} />
+            <Stat size="md" label="遗留未闭环" value={fmtInt(card?.legacy.open)} tone={card?.legacy.highRisk ? 'violet' : undefined} sub={card?.legacy.highRisk ? `高危 ${card.legacy.highRisk}` : undefined} />
+          </div>
+
+          <div className="mt-5">
+            <div className="flex items-baseline justify-between text-[13px] text-ink-3">
+              <span>近 30 天日用电 · kWh</span>
+              <Link to={`/energy`} className="hover:text-ink-1">
+                能耗详情 →
+              </Link>
+            </div>
+            <Loadable loading={detail.isLoading} fetching={detail.isFetching} skeleton={<Skeleton className="mt-2 h-[150px]" />}>
+              {d?.energy.trend.length ? (
+                <EChart option={trendArea(d.energy.trend, { color: C.accent, avgLine: true })} height={150} ariaLabel="楼栋日用电趋势" />
+              ) : (
+                <Empty title="能耗服务未返回该楼栋数据" className="py-6" />
+              )}
+            </Loadable>
+          </div>
+
+          <Tabs
+            className="mt-6"
+            value={tab}
+            onChange={(v) => setUrl({ tab: v === 'tickets' ? null : v })}
+            options={[
+              { value: 'tickets', label: '在途报修', count: d?.tickets.open.length },
+              { value: 'legacy', label: '施工遗留', count: openLegacy.length },
+            ]}
+          />
+          <div className="scroll-thin max-h-[440px] overflow-y-auto pt-2 xl:max-h-[calc(100dvh-560px)] xl:min-h-[220px]">
+            <Loadable loading={detail.isLoading} fetching={detail.isFetching}>
+              {tab === 'tickets' ? (
+                d?.tickets.open.length ? (
+                  <>
+                    {d.tickets.open.map((t) => (
+                      <TicketRow key={t.id} t={t} onOpen={setTicket} dense />
+                    ))}
+                    <p className="pt-3 text-[12px] text-ink-3">
+                      该楼累计 {fmtInt(d.tickets.stats.total)} 单，闭环率 {fmtPct(d.tickets.stats.rate)} ·{' '}
+                      <Link to={`/repair?tab=all&building=${selected}`} className="text-ink-2 hover:text-ink-1">
+                        查看全部 →
+                      </Link>
+                    </p>
+                  </>
+                ) : (
+                  <Empty title="没有在途报修" />
+                )
+              ) : openLegacy.length ? (
+                openLegacy.map((i) => <LegacyRow key={i.id} item={i} onOpen={setLegacy} />)
+              ) : (
+                <Empty title="没有未闭环的施工遗留" />
+              )}
+            </Loadable>
+          </div>
+        </aside>
+      </div>
 
       <TicketDrawer ticket={ticket} onClose={() => setTicket(null)} />
       <LegacyDrawer item={legacy} onClose={() => setLegacy(null)} />
@@ -188,108 +148,34 @@ function score(b: BuildingCard) {
   return b.tickets.red * 10 + b.legacy.highRisk * 8 + b.tickets.yellow * 3 + b.tickets.open + b.legacy.open;
 }
 
-function Stat({
-  icon,
-  label,
-  value,
-  unit,
-  tone,
-  note,
-  noteTone,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  unit: string;
-  tone: 'energy' | 'repair' | 'legacy';
-  note?: string;
-  noteTone?: 'crit' | 'warn';
-}) {
-  const ic = { energy: 'text-energy', repair: 'text-repair', legacy: 'text-legacy' }[tone];
-  return (
-    <div className="bg-surface px-5 py-3">
-      <div className="flex items-center gap-1.5 text-caption text-ink-3">
-        <span className={clsx('[&_svg]:size-3', ic)}>{icon}</span>
-        {label}
-      </div>
-      <div className="mt-1 flex items-baseline gap-1">
-        <span className="text-[22px] leading-7 font-semibold text-ink-1">{value}</span>
-        <span className="text-caption text-ink-3">{unit}</span>
-      </div>
-      <div className={clsx('h-4 text-caption font-medium', noteTone === 'crit' ? 'text-crit-ink' : 'text-warn-ink')}>{note}</div>
-    </div>
-  );
-}
-
-function MapLegend({ metric }: { metric: MapMetric }) {
-  if (metric === 'health')
-    return (
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-ink-2">
-        {[
-          ['#ffffff', '#d9dfe7', '正常'],
-          ['#fff8e6', '#f2cf75', '关注（临期 / 遗留未完成）'],
-          ['#fdeeee', '#ec9a9a', '告警（超时 / 高危遗留）'],
-        ].map(([bg, bd, t]) => (
-          <span key={t} className="inline-flex items-center gap-1.5 whitespace-nowrap">
-            <span className="size-3 rounded-[3px] border" style={{ background: bg, borderColor: bd }} />
-            {t}
-          </span>
-        ))}
-      </div>
-    );
-  const ramp = rampFor(metric);
-  return (
-    <div className="flex items-center gap-2 text-caption text-ink-3">
-      低
-      <span className="flex overflow-hidden rounded-[3px]">
-        {ramp.map((c) => (
-          <span key={c} className="h-3 w-5" style={{ background: c }} />
-        ))}
-      </span>
-      高
-    </div>
-  );
-}
-
 function BuildingTable({ items, selected, onSelect }: { items: BuildingCard[]; selected: string; onSelect: (c: string) => void }) {
   return (
-    <Table>
+    <Table className="min-w-[720px]">
       <thead>
         <tr>
           <Th>楼栋</Th>
-          <Th>状态</Th>
-          <Th align="right">近 30 天电量 (kWh)</Th>
-          <Th>近 14 天趋势</Th>
-          <Th align="right">昨日 (kWh)</Th>
-          <Th align="right">未完成报修</Th>
-          <Th align="right">超时 / 临期</Th>
-          <Th align="right">遗留未完成</Th>
-          <Th align="right">高危遗留</Th>
+          <Th align="right">近30天 kWh</Th>
+          <Th>近14天</Th>
+          <Th align="right">在途报修</Th>
+          <Th align="right">超时</Th>
+          <Th align="right">遗留未闭环</Th>
+          <Th align="right">高危</Th>
         </tr>
       </thead>
       <tbody>
         {items.map((b) => (
-          <Tr key={b.code} onClick={() => onSelect(b.code)} className={clsx(b.code === selected && 'bg-brand-soft/50')}>
-            <Td className="font-medium">
-              {b.name}
-              <span className="ml-1.5 text-caption font-normal text-ink-3">{b.kind === 'office' ? '办公' : b.kind === 'apartment' ? '公寓/配套' : ''}</span>
-            </Td>
-            <Td>
-              <HealthBadge health={b.health} />
-            </Td>
+          <Tr key={b.code} onClick={() => onSelect(b.code)} className={clsx(b.code === selected && 'bg-subtle')}>
+            <Td className="font-medium">{b.name}</Td>
             <Td align="right">{fmtInt(b.energy.kwh30d)}</Td>
             <Td>
-              <Sparkline values={b.energy.spark} width={96} height={22} stroke={C.energy} fill={false} />
+              <Sparkline values={b.energy.spark} width={88} height={20} stroke="#8f8f8f" fill={false} />
             </Td>
-            <Td align="right">{fmtInt(b.energy.yesterdayKwh)}</Td>
-            <Td align="right">{b.tickets.open}</Td>
-            <Td align="right">
-              <span className={b.tickets.red ? 'font-semibold text-crit-ink' : 'text-ink-3'}>{b.tickets.red}</span>
-              <span className="text-ink-4"> / </span>
-              <span className={b.tickets.yellow ? 'text-warn-ink' : 'text-ink-3'}>{b.tickets.yellow}</span>
+            <Td align="right">{b.tickets.open || <span className="text-ink-4">0</span>}</Td>
+            <Td align="right" className={b.tickets.red ? 'font-medium text-crit-ink' : 'text-ink-4'}>
+              {b.tickets.red}
             </Td>
-            <Td align="right">{b.legacy.open}</Td>
-            <Td align="right" className={b.legacy.highRisk ? 'font-semibold text-crit-ink' : 'text-ink-3'}>
+            <Td align="right">{b.legacy.open || <span className="text-ink-4">0</span>}</Td>
+            <Td align="right" className={b.legacy.highRisk ? 'font-medium text-violet-ink' : 'text-ink-4'}>
               {b.legacy.highRisk}
             </Td>
           </Tr>

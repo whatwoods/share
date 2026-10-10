@@ -3,7 +3,7 @@ export function Sparkline({
   values,
   width = 96,
   height = 28,
-  stroke = '#2a78d6',
+  stroke = "#171717",
   fill = true,
 }: {
   values: number[];

@@ -111,7 +111,7 @@ export function rankBars(
         barCategoryGap: '38%',
         itemStyle: { borderRadius: [0, 4, 4, 0] },
         showBackground: true,
-        backgroundStyle: { color: '#f4f6f9', borderRadius: [0, 4, 4, 0] },
+        backgroundStyle: { color: '#f5f5f5', borderRadius: [0, 4, 4, 0] },
         label: { show: true, position: 'right', ...baseText, color: C.ink2, fontSize: 11, formatter: (p: { value: number }) => fmt(p.value) },
         emphasis: { itemStyle: { opacity: 0.85 } },
         cursor: 'pointer',
@@ -136,7 +136,7 @@ export function monthStack(rows: { month: string; closed: number; open: number; 
     tooltip: {
       ...tooltipBase,
       trigger: 'axis',
-      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(15,23,41,.04)' } },
+      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.03)' } },
       formatter: (ps: { dataIndex: number }[]) => {
         const r = rows[ps[0].dataIndex];
         return (
@@ -177,7 +177,7 @@ export function dayColumns(rows: { date: string; total: number; closed: number }
     tooltip: {
       ...tooltipBase,
       trigger: 'axis',
-      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(15,23,41,.04)' } },
+      axisPointer: { type: 'shadow', shadowStyle: { color: 'rgba(0,0,0,.03)' } },
       formatter: (ps: { dataIndex: number }[]) => {
         const r = rows[ps[0].dataIndex];
         return tipTitle(r.date) + tipRow(color, `${r.total} 单`, '新增报修', false) + tipRow(C.baseline, `${r.closed} 单`, '其中已完成', false);

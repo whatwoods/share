@@ -1,74 +1,76 @@
 @import 'tailwindcss';
 
-/* 设计系统 tokens —— 规范见 docs/DESIGN_SYSTEM.md */
+/*
+ * 设计系统 v2 · 极简精致（Linear / Notion 方向）
+ * 原则：白底、细线分隔代替卡片、黑白灰 + 一个强调色、排版即层级。
+ * 颜色只在「状态」与「数据」上出现。规范见 docs/DESIGN_SYSTEM.md
+ */
 @theme {
-  --font-sans: 'Inter var', Inter, 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif;
+  --font-sans: Inter, 'Inter var', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, Menlo, Consolas, monospace;
 
-  --color-page: #f4f6f9;
+  /* 中性 */
+  --color-page: #ffffff;
   --color-surface: #ffffff;
-  --color-subtle: #f8f9fb;
-  --color-hover: #f1f4f8;
-  --color-line: #e4e8ee;
-  --color-line-strong: #cfd6df;
-  --color-grid: #edf0f4;
+  --color-subtle: #fafafa;
+  --color-hover: #f5f5f5;
+  --color-press: #efefef;
+  --color-line: #ededed;
+  --color-line-strong: #e0e0e0;
+  --color-grid: #f2f2f2;
 
-  --color-ink-1: #0f1729;
-  --color-ink-2: #4a5568;
-  --color-ink-3: #8a94a6;
-  --color-ink-4: #b4bccb;
+  --color-ink-1: #171717;
+  --color-ink-2: #5d5d5d;
+  --color-ink-3: #8f8f8f;
+  --color-ink-4: #bcbcbc;
 
-  --color-brand: #2563eb;
-  --color-brand-soft: #eaf1fe;
-  --color-brand-ink: #1d4ed8;
-  --color-nav: #0f1729;
+  /* 唯一强调色 */
+  --color-accent: #5e6ad2;
+  --color-accent-hover: #4f5bc4;
+  --color-accent-soft: #f0f1fc;
+  --color-accent-ink: #4954b8;
 
-  --color-energy: #2a78d6;
-  --color-energy-soft: #e9f2fc;
-  --color-repair: #0f9b6e;
-  --color-repair-soft: #e6f6f0;
-  --color-legacy: #6250d6;
-  --color-legacy-soft: #efedfc;
-  --color-building: #0e7490;
-  --color-building-soft: #e6f4f7;
-
-  --color-crit: #d03b3b;
-  --color-crit-soft: #fdeeee;
-  --color-crit-ink: #b42323;
-  --color-warn: #e9a100;
-  --color-warn-soft: #fff6e0;
-  --color-warn-ink: #9a6400;
-  --color-good: #0ca30c;
-  --color-good-soft: #e8f7e8;
-  --color-good-ink: #0b7a0b;
-  --color-info: #2563eb;
-  --color-info-soft: #eaf1fe;
-  --color-info-ink: #1d4ed8;
+  /* 状态（只用于点、细条、少量文字） */
+  --color-crit: #e5484d;
+  --color-crit-soft: #fdf0f0;
+  --color-crit-ink: #c93237;
+  --color-warn: #f0a429;
+  --color-warn-soft: #fef7ea;
+  --color-warn-ink: #a86a05;
+  --color-good: #30a46c;
+  --color-good-soft: #edf8f2;
+  --color-good-ink: #20794f;
+  --color-info: #5e6ad2;
+  --color-info-soft: #f0f1fc;
+  --color-info-ink: #4954b8;
+  --color-violet: #8e4ec6;
+  --color-violet-soft: #f6f0fb;
+  --color-violet-ink: #7239a6;
 
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
 
-  --shadow-card: 0 1px 2px rgba(15, 23, 41, 0.04), 0 1px 1px rgba(15, 23, 41, 0.02);
-  --shadow-pop: 0 12px 32px -8px rgba(15, 23, 41, 0.18), 0 4px 8px -4px rgba(15, 23, 41, 0.08);
-  --shadow-drawer: -16px 0 48px -12px rgba(15, 23, 41, 0.22);
+  --shadow-pop: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 8px 24px -6px rgba(0, 0, 0, 0.12), 0 2px 6px -2px rgba(0, 0, 0, 0.06);
+  --shadow-drawer: 0 0 0 1px rgba(0, 0, 0, 0.06), -24px 0 48px -16px rgba(0, 0, 0, 0.14);
+  --shadow-raise: 0 1px 2px rgba(0, 0, 0, 0.05);
 
   --ease-out-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
 
   --text-micro: 11px;
-  --text-micro--line-height: 14px;
+  --text-micro--line-height: 16px;
   --text-caption: 12px;
-  --text-caption--line-height: 16px;
-  --text-body: 13px;
-  --text-body--line-height: 20px;
+  --text-caption--line-height: 18px;
+  --text-body: 14px;
+  --text-body--line-height: 22px;
   --text-h2: 15px;
   --text-h2--line-height: 22px;
-  --text-h1: 20px;
-  --text-h1--line-height: 28px;
-  --text-kpi: 26px;
-  --text-kpi--line-height: 32px;
-  --text-display: 32px;
-  --text-display--line-height: 38px;
+  --text-h1: 26px;
+  --text-h1--line-height: 34px;
+  --text-stat: 32px;
+  --text-stat--line-height: 38px;
+  --text-hero: 56px;
+  --text-hero--line-height: 60px;
 }
 
 @layer base {
@@ -82,17 +84,17 @@
     background: var(--color-page);
     color: var(--color-ink-1);
     font-family: var(--font-sans);
-    font-size: 13px;
-    line-height: 20px;
-    font-feature-settings: 'cv11', 'ss01';
+    font-size: 14px;
+    line-height: 22px;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
   :focus-visible {
-    outline: 2px solid var(--color-brand);
+    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
     border-radius: 4px;
   }
   ::selection {
-    background: #cde2fb;
+    background: #dfe2fa;
   }
   button {
     cursor: pointer;
@@ -105,19 +107,17 @@
 @layer components {
   .num {
     font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum', 'cv11', 'ss01';
   }
-  .card {
-    background: var(--color-surface);
-    border: 1px solid var(--color-line);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-card);
+  .tight {
+    letter-spacing: -0.02em;
   }
   .scroll-thin {
     scrollbar-width: thin;
     scrollbar-color: var(--color-line-strong) transparent;
   }
   .refetching {
-    opacity: 0.55;
+    opacity: 0.5;
     transition: opacity 160ms var(--ease-out-soft);
   }
   .skeleton {
@@ -127,26 +127,41 @@
     border-radius: var(--radius-sm);
   }
   .field {
-    height: 32px;
+    height: 30px;
     border: 1px solid var(--color-line-strong);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     background: var(--color-surface);
     padding: 0 10px;
     font-size: 13px;
     color: var(--color-ink-1);
-    transition: border-color 120ms, box-shadow 120ms;
+    transition: border-color 120ms, box-shadow 120ms, background 120ms;
   }
   .field:hover {
-    border-color: var(--color-ink-4);
+    background: var(--color-subtle);
   }
   .field:focus {
     outline: none;
-    border-color: var(--color-brand);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(94, 106, 210, 0.16);
   }
   .insight b {
     font-weight: 600;
     color: var(--color-ink-1);
+  }
+  .kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border: 1px solid var(--color-line-strong);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    font-size: 10px;
+    line-height: 1;
+    color: var(--color-ink-3);
+    background: var(--color-surface);
+    font-family: var(--font-sans);
   }
 }
 
@@ -155,12 +170,16 @@
   100% { background-position: -200% 0; }
 }
 @keyframes drawer-in {
-  from { transform: translateX(24px); opacity: 0; }
+  from { transform: translateX(16px); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
 @keyframes fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+@keyframes pop-in {
+  from { transform: translateY(-6px) scale(0.98); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 @keyframes toast-in {
   from { transform: translateY(8px); opacity: 0; }

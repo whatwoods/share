@@ -46,8 +46,8 @@ export function useSyncNow() {
 }
 
 /* ── 工单 ── */
-export const useTickets = (q: Query) =>
-  useQuery({ queryKey: ['tickets', 'list', q], queryFn: () => api<Paged<Ticket>>('/tickets', { query: q }), placeholderData: keepPreviousData });
+export const useTickets = (q: Query, enabled = true) =>
+  useQuery({ queryKey: ['tickets', 'list', q], queryFn: () => api<Paged<Ticket>>('/tickets', { query: q }), placeholderData: keepPreviousData, enabled });
 
 export const useTicketBoard = (q: Query) =>
   useQuery({ queryKey: ['tickets', 'board', q], queryFn: () => api<TicketBoard>('/tickets/board', { query: q }), placeholderData: keepPreviousData });
@@ -59,8 +59,8 @@ export const useTicket = (id: string | null) =>
   useQuery({ queryKey: ['tickets', 'one', id], queryFn: () => api<Ticket>(`/tickets/${encodeURIComponent(id!)}`), enabled: !!id });
 
 /* ── 遗留 ── */
-export const useLegacy = (q: Query) =>
-  useQuery({ queryKey: ['legacy', 'list', q], queryFn: () => api<{ items: LegacyItem[] }>('/legacy', { query: q }), placeholderData: keepPreviousData });
+export const useLegacy = (q: Query, enabled = true) =>
+  useQuery({ queryKey: ['legacy', 'list', q], queryFn: () => api<{ items: LegacyItem[] }>('/legacy', { query: q }), placeholderData: keepPreviousData, enabled });
 
 export const useLegacySummary = () =>
   useQuery({ queryKey: ['legacy', 'summary'], queryFn: () => api<LegacySummary>('/legacy/summary') });

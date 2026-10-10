@@ -11,6 +11,7 @@ const EnergyPage = lazy(() => import('./pages/Energy'));
 const RepairPage = lazy(() => import('./pages/Repair'));
 const LegacyPage = lazy(() => import('./pages/Legacy'));
 const BuildingsPage = lazy(() => import('./pages/Buildings'));
+const ReportPage = lazy(() => import('./pages/Report'));
 
 export function App() {
   const navigate = useNavigate();
@@ -24,6 +25,14 @@ export function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/report"
+        element={
+          <AuthGate>
+            <Lazy el={<ReportPage />} />
+          </AuthGate>
+        }
+      />
       <Route
         element={
           <AuthGate key={loc.pathname === '/login' ? 'l' : 'a'}>
@@ -46,8 +55,8 @@ function Lazy({ el }: { el: React.ReactNode }) {
   return (
     <Suspense
       fallback={
-        <div className="grid gap-4">
-          <Skeleton className="h-24" />
+        <div className="grid gap-6">
+          <Skeleton className="h-10 w-64" />
           <Skeleton className="h-72" />
         </div>
       }
@@ -60,7 +69,7 @@ function Lazy({ el }: { el: React.ReactNode }) {
 function AuthGate({ children }: { children: React.ReactNode }) {
   const me = useAuthMe();
   const loc = useLocation();
-  if (me.isLoading) return <div className="grid h-dvh place-items-center text-ink-3">加载中…</div>;
+  if (me.isLoading) return <div className="grid h-dvh place-items-center text-[13px] text-ink-3">加载中…</div>;
   if (me.data && me.data.authEnabled && !me.data.authenticated) {
     return <Navigate to={`/login?next=${encodeURIComponent(loc.pathname + loc.search)}`} replace />;
   }

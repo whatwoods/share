@@ -1,34 +1,35 @@
 import clsx from 'clsx';
-import { AlertOctagon, Columns3, Download, FileSpreadsheet, Flame, Gavel, List, Radar, Repeat, Scale } from 'lucide-react';
+import { Download } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import type { LegacyGroup, LegacyItem, LegacySummary } from '@shared/contract';
-import { LegacyCard } from '@/components/legacy/LegacyCard';
 import { LegacyDrawer } from '@/components/legacy/LegacyDrawer';
-import { Badge, RiskBadge, StatusBadge } from '@/components/ui/Badge';
+import { LegacyRow } from '@/components/legacy/LegacyRow';
 import { Button } from '@/components/ui/Button';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { CopyButton } from '@/components/ui/Copy';
 import { FilterBar, SearchInput, Select, Toggle } from '@/components/ui/Fields';
-import { KpiCard } from '@/components/ui/KpiCard';
-import { Segmented } from '@/components/ui/Segmented';
+import { Section } from '@/components/ui/Section';
+import { Stat, StatRow } from '@/components/ui/Stat';
 import { Empty, Loadable, Skeleton } from '@/components/ui/States';
 import { Table, Td, Th, Tr } from '@/components/ui/Table';
+import { Tabs } from '@/components/ui/Tabs';
 import { useToast } from '@/components/ui/Toast';
 import { download } from '@/lib/api';
-import { buildingShort } from '@/lib/buildings';
-import { fmtDays, fmtInt } from '@/lib/format';
+import { buildingName } from '@/lib/buildings';
+import { fmtDays, fmtInt, ymd } from '@/lib/format';
 import { useLegacy, useLegacySummary, useMeta } from '@/lib/queries';
 import { useUrlState } from '@/lib/url-state';
 import { BuildingSelect } from './Repair';
 
-const KEYS = ['group', 'status', 'building', 'q', 'all', 'view'] as const;
-const GROUP_ORDER: LegacyGroup[] = ['DECAI', 'SCG', 'QIJU', 'LEAK', 'DISPUTE', 'OTHER'];
-const GROUP_ICON: Record<LegacyGroup, React.ReactNode> = {
-  DECAI: <Gavel />,
-  SCG: <Gavel />,
-  QIJU: <Gavel />,
-  LEAK: <Repeat />,
-  DISPUTE: <Scale />,
-  OTHER: <AlertOctagon />,
+const KEYS = ['group', 'status', 'building', 'q', 'all'] as const;
+const ORDER: LegacyGroup[] = ['DECAI', 'SCG', 'QIJU', 'LEAK', 'DISPUTE', 'OTHER'];
+const STATUS_COLOR: Record<string, string> = {
+  已完成: '#30a46c',
+  跟进中: '#5e6ad2',
+  观察中: '#bcbcbc',
+  未处理: '#f0a429',
+  计划逾期: '#e5484d',
+  重复漏水: '#e5484d',
+  有争议: '#8e4ec6',
 };
 
 export default function LegacyPage() {
@@ -39,15 +40,14 @@ export default function LegacyPage() {
   const [open, setOpen] = useState<LegacyItem | null>(null);
   const toast = useToast();
   const [exporting, setExporting] = useState<string | null>(null);
-  const view = (s.view || 'columns') as 'columns' | 'table';
-
-  const groups = useMemo(() => (summary.data?.groups ?? []).filter((g) => g.total > 0).sort((a, b) => GROUP_ORDER.indexOf(a.key) - GROUP_ORDER.indexOf(b.key)), [summary.data]);
+  const sm = summary.data;
+  const groups = useMemo(() => (sm?.groups ?? []).filter((g) => g.total > 0).sort((a, b) => ORDER.indexOf(a.key) - ORDER.indexOf(b.key)), [sm]);
 
   const doExport = async (group: string) => {
     setExporting(group);
     try {
       await download('/legacy/export', { group, open: s.all === '1' ? undefined : '1' }, '施工遗留索赔清单.xlsx');
-      toast({ kind: 'success', title: '索赔清单已生成', body: '已按施工单位格式化，可直接用于例会协调与法务索赔' });
+      toast({ kind: 'success', title: '索赔清单已生成', body: '已按施工单位分表并格式化，可直接用于例会与法务' });
     } catch (e) {
       toast({ kind: 'error', title: '导出失败', body: (e as Error).message });
     } finally {
@@ -55,258 +55,219 @@ export default function LegacyPage() {
     }
   };
 
-  const sm = summary.data;
   const repeatLeak = sm?.byStatus.find((x) => x.status === '重复漏水')?.count ?? 0;
-  const disputed = sm?.groups.find((g) => g.key === 'DISPUTE');
+  const dispute = sm?.groups.find((g) => g.key === 'DISPUTE');
+  const items = list.data?.items ?? [];
+  const grouped = useMemo(() => {
+    const m = new Map<LegacyGroup, LegacyItem[]>();
+    for (const i of items) m.set(i.group, [...(m.get(i.group) ?? []), i]);
+    return ORDER.filter((k) => m.get(k)?.length).map((k) => ({ key: k, label: groups.find((g) => g.key === k)?.label ?? k, items: m.get(k)! }));
+  }, [items, groups]);
 
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
-        <KpiCard loading={summary.isLoading} label="专项台账总数" value={fmtInt(sm?.total)} unit="项" icon={<FileSpreadsheet />} accent="legacy" foot="久拖未决历史遗留单" />
-        <KpiCard loading={summary.isLoading} label="未闭环" value={fmtInt(sm?.open)} unit="项" icon={<AlertOctagon />} accent="building" foot={sm && `闭环 ${sm.total - sm.open} 项`} />
-        <KpiCard loading={summary.isLoading} label="高危隐患" value={fmtInt(sm?.radar.length)} unit="项" icon={<Flame />} accent="crit" foot="外立面玻璃 · 排污堵塞等" />
-        <KpiCard loading={summary.isLoading} label="重复漏水" value={fmtInt(repeatLeak)} unit="项" icon={<Repeat />} accent="warn" foot="多次处理仍复发" />
-        <KpiCard
-          loading={summary.isLoading}
-          label="争议待定责"
-          value={fmtInt(disputed?.open)}
-          unit="项"
-          icon={<Scale />}
-          accent="legacy"
-          foot="责任主体待明确，需上会"
-          onClick={() => set({ group: 'DISPUTE' })}
-        />
+    <div>
+      <div className="flex flex-wrap items-end gap-4">
+        <div className="flex-1">
+          <h1 className="text-h1 font-semibold tight">遗留攻坚</h1>
+          <p className="mt-1 text-[14px] text-ink-3">施工单位久拖未决专项台账 · 索赔与质保对账</p>
+        </div>
+        <Button variant="primary" icon={<Download />} loading={exporting === 'ALL'} onClick={() => doExport('ALL')}>
+          导出全部单位索赔清单
+        </Button>
       </div>
 
-      <RadarCard summary={sm} loading={summary.isLoading} onOpen={setOpen} />
+      <StatRow className="mt-8 grid-cols-2 lg:grid-cols-5">
+        <Stat label="台账总数" value={fmtInt(sm?.total)} unit="项" loading={summary.isLoading} />
+        <Stat label="未闭环" value={fmtInt(sm?.open)} unit="项" sub={sm && `已闭环 ${sm.total - sm.open}`} loading={summary.isLoading} />
+        <Stat label="高危隐患" tone="crit" value={fmtInt(sm?.radar.length)} unit="项" sub="外立面玻璃 · 排污堵塞等" loading={summary.isLoading} />
+        <Stat label="重复漏水" tone="warn" value={fmtInt(repeatLeak)} unit="项" sub="多次处理仍复发" loading={summary.isLoading} />
+        <Stat label="争议待定责" tone="violet" value={fmtInt(dispute?.open)} unit="项" sub="需上会明确责任主体" loading={summary.isLoading} onClick={() => set({ group: 'DISPUTE' })} />
+      </StatRow>
 
-      <Card>
-        <CardHeader
-          title="按施工单位切片对账"
-          subtitle="每个单位的挂账清单 · 一键生成格式化 Excel 索赔清单"
-          actions={
-            <Button variant="primary" icon={<Download className="size-3.5" />} loading={exporting === 'ALL'} onClick={() => doExport('ALL')}>
-              导出全部单位对账单
-            </Button>
-          }
+      <div className="mt-14 grid gap-x-14 gap-y-12 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <Radar summary={sm} loading={summary.isLoading} onOpen={setOpen} />
+        <UnitTable groups={groups} loading={summary.isLoading} active={s.group} onPick={(k) => set({ group: s.group === k ? null : k })} onExport={doExport} exporting={exporting} />
+      </div>
+
+      <Section
+        title="挂账清单"
+        count={items.length}
+        className="mt-14"
+        actions={
+          s.group && (
+            <>
+              <CopyButton label="复制对账摘要" text={() => digest(groups.find((g) => g.key === s.group)?.label ?? '', items)} />
+              <Button size="sm" icon={<Download />} loading={exporting === s.group} onClick={() => doExport(s.group)}>
+                导出本单位
+              </Button>
+            </>
+          )
+        }
+        flush
+      >
+        <Tabs
+          className="mt-1"
+          value={s.group || 'ALL'}
+          onChange={(v) => set({ group: v === 'ALL' ? null : v })}
+          options={[{ value: 'ALL', label: '全部', count: sm?.open }, ...groups.map((g) => ({ value: g.key, label: g.label, count: g.open }))]}
         />
-        <CardBody className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-            {groups.map((g) => {
-              const active = s.group === g.key;
-              return (
-                <div
-                  key={g.key}
-                  className={clsx(
-                    'group relative rounded-[12px] border p-3.5 transition-colors',
-                    active ? 'border-legacy/50 bg-legacy-soft/50 ring-2 ring-legacy/15' : 'border-line hover:border-legacy/30',
-                  )}
-                >
-                  <button className="absolute inset-0 rounded-[12px]" aria-label={`筛选 ${g.label}`} onClick={() => set({ group: active ? null : g.key })} />
-                  <div className="flex items-center gap-2">
-                    <span className="grid size-6 place-items-center rounded-[7px] bg-legacy-soft text-legacy [&_svg]:size-3.5">{GROUP_ICON[g.key]}</span>
-                    <span className="text-body font-semibold text-ink-1">{g.label}</span>
-                    <span className="flex-1" />
-                    <button
-                      className="relative z-[1] rounded-md p-1 text-ink-3 hover:bg-surface hover:text-legacy"
-                      title={`导出 ${g.label} 索赔清单`}
-                      aria-label={`导出 ${g.label} 索赔清单`}
-                      onClick={() => doExport(g.key)}
-                      disabled={!!exporting}
-                    >
-                      <Download className={clsx('size-3.5', exporting === g.key && 'animate-pulse')} />
-                    </button>
-                  </div>
-                  <div className="mt-2 flex items-baseline gap-1.5">
-                    <span className="num text-[24px] leading-8 font-semibold text-ink-1">{g.total}</span>
-                    <span className="text-caption text-ink-3">单</span>
-                    <span className="flex-1" />
-                    <span className="text-caption text-ink-2">
-                      未闭环 <b className="num font-semibold text-ink-1">{g.open}</b>
-                    </span>
-                  </div>
-                  <StatusStrip byStatus={g.byStatus} total={g.total} />
-                  {g.highRisk > 0 && (
-                    <div className="mt-2 text-caption font-medium text-crit-ink">
-                      <Flame className="mr-0.5 inline size-3" />
-                      高危 {g.highRisk} 项
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            {summary.isLoading && [0, 1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-[132px]" />)}
-          </div>
-
-          <FilterBar active={!!(s.group || s.status || s.building || s.q || s.all)} onReset={reset}>
-            <Segmented
-              value={view}
-              onChange={(v) => set({ view: v === 'columns' ? null : v })}
-              options={[
-                { value: 'columns', label: <span className="inline-flex items-center gap-1"><Columns3 className="size-3.5" />分栏</span> },
-                { value: 'table', label: <span className="inline-flex items-center gap-1"><List className="size-3.5" />列表</span> },
-              ]}
-            />
-            <Select
-              value={s.status}
-              onChange={(v) => set({ status: v })}
-              placeholder="全部状态"
-              width={112}
-              options={(meta.data?.legacyStatuses ?? []).map((x) => ({ value: x, label: x }))}
-            />
-            <BuildingSelect meta={meta.data} value={s.building} onChange={(v) => set({ building: v })} />
-            <SearchInput value={s.q} onChange={(v) => set({ q: v })} placeholder="搜索问题 / 进展 / 卡点" />
-            <Toggle checked={s.all === '1'} onChange={(v) => set({ all: v ? '1' : null })} label="包含已完成" />
-          </FilterBar>
-
-          <Loadable loading={list.isLoading} fetching={list.isFetching} error={list.error}>
-            {list.data && list.data.items.length === 0 ? (
-              <Empty title="没有符合条件的遗留问题" />
-            ) : view === 'columns' ? (
-              <GroupColumns items={list.data?.items ?? []} groups={groups.filter((g) => !s.group || g.key === s.group)} onOpen={setOpen} />
-            ) : (
-              <LegacyTable items={list.data?.items ?? []} onOpen={setOpen} />
-            )}
-          </Loadable>
-        </CardBody>
-      </Card>
+        <FilterBar active={!!(s.status || s.building || s.q || s.all)} onReset={() => (reset(), s.group && set({ group: s.group }))} className="mt-3">
+          <Select value={s.status} onChange={(v) => set({ status: v })} placeholder="状态" label="状态" options={(meta.data?.legacyStatuses ?? []).map((x) => ({ value: x, label: x }))} />
+          <BuildingSelect meta={meta.data} value={s.building} onChange={(v) => set({ building: v })} />
+          <SearchInput value={s.q} onChange={(v) => set({ q: v })} placeholder="搜索问题 / 进展 / 卡点" />
+          <Toggle checked={s.all === '1'} onChange={(v) => set({ all: v ? '1' : null })} label="包含已完成" />
+        </FilterBar>
+        <Loadable loading={list.isLoading} fetching={list.isFetching} error={list.error} className="mt-3">
+          {items.length === 0 ? (
+            <Empty title="没有符合条件的遗留问题" />
+          ) : s.group ? (
+            items.map((i) => <LegacyRow key={i.id} item={i} onOpen={setOpen} />)
+          ) : (
+            <div className="space-y-8">
+              {grouped.map((g) => (
+                <GroupBlock key={g.key} label={g.label} items={g.items} onOpen={setOpen} onMore={() => set({ group: g.key })} />
+              ))}
+            </div>
+          )}
+        </Loadable>
+      </Section>
 
       <LegacyDrawer item={open} onClose={() => setOpen(null)} />
     </div>
   );
 }
 
-function StatusStrip({ byStatus, total }: { byStatus: { status: string; count: number }[]; total: number }) {
-  const color: Record<string, string> = {
-    已完成: '#0ca30c',
-    跟进中: '#2563eb',
-    观察中: '#8a94a6',
-    未处理: '#e9a100',
-    计划逾期: '#d03b3b',
-    重复漏水: '#d03b3b',
-    有争议: '#6250d6',
-  };
+function Radar({ summary, loading, onOpen }: { summary?: LegacySummary; loading: boolean; onOpen: (i: LegacyItem) => void }) {
   return (
-    <div className="mt-2.5 flex h-1.5 gap-[2px] overflow-hidden rounded-full" title={byStatus.map((x) => `${x.status} ${x.count}`).join(' · ')}>
-      {byStatus.map((x) => (
-        <span key={x.status} style={{ width: `${(x.count / Math.max(1, total)) * 100}%`, background: color[x.status] ?? '#b4bccb' }} />
-      ))}
-    </div>
-  );
-}
-
-function RadarCard({ summary, loading, onOpen }: { summary?: LegacySummary; loading: boolean; onOpen: (i: LegacyItem) => void }) {
-  return (
-    <Card className="overflow-hidden">
-      <div className="flex items-center gap-3 border-b border-crit/10 bg-gradient-to-r from-crit-soft/70 to-transparent px-5 py-3.5">
-        <span className="grid size-8 place-items-center rounded-[9px] bg-crit text-white">
-          <Radar className="size-4" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-h2 font-semibold text-ink-1">高危隐患雷达</h2>
-          <p className="text-caption text-ink-2">高空外立面玻璃、后厨排污堵塞、重复渗漏、责任未定等硬骨头置顶 · 风险分按关键词、状态、挂账时长综合计算</p>
-        </div>
-        {summary && <Badge tone="crit">{summary.radar.length} 项</Badge>}
-      </div>
-      <CardBody className="pt-4">
-        {loading ? (
-          <Skeleton className="h-40" />
-        ) : summary?.radar.length ? (
-          <div className="grid gap-2.5 md:grid-cols-2 xl:grid-cols-3">
-            {summary.radar.map((i) => (
-              <LegacyCard key={i.id} item={i} onOpen={onOpen} />
-            ))}
-          </div>
-        ) : (
-          <Empty title="暂无高危隐患" />
-        )}
-      </CardBody>
-    </Card>
-  );
-}
-
-function GroupColumns({
-  items,
-  groups,
-  onOpen,
-}: {
-  items: LegacyItem[];
-  groups: { key: LegacyGroup; label: string }[];
-  onOpen: (i: LegacyItem) => void;
-}) {
-  const by = new Map<LegacyGroup, LegacyItem[]>();
-  for (const i of items) by.set(i.group, [...(by.get(i.group) ?? []), i]);
-  const cols = groups.filter((g) => by.get(g.key)?.length);
-  return (
-    <div className="scroll-thin -mx-1 flex gap-3 overflow-x-auto px-1 pb-2">
-      {cols.map((g) => {
-        const xs = by.get(g.key) ?? [];
-        return (
-          <section key={g.key} className={clsx('flex shrink-0 flex-col rounded-[14px] border border-line bg-subtle', cols.length === 1 ? 'w-full' : 'w-[340px]')}>
-            <header className="flex items-center gap-2 px-3.5 pt-3 pb-2">
-              <h3 className="text-body font-semibold text-ink-1">{g.label}</h3>
-              <span className="num rounded-full bg-surface px-2 text-caption text-ink-2 shadow-card">{xs.length}</span>
-            </header>
-            <div className={clsx('scroll-thin max-h-[640px] gap-2 overflow-y-auto px-2.5 pb-2.5', cols.length === 1 ? 'grid md:grid-cols-2 xl:grid-cols-3' : 'flex flex-col')}>
-              {xs.map((i) => (
-                <LegacyCard key={i.id} item={i} onOpen={onOpen} />
-              ))}
-            </div>
-          </section>
-        );
-      })}
-    </div>
-  );
-}
-
-function LegacyTable({ items, onOpen }: { items: LegacyItem[]; onOpen: (i: LegacyItem) => void }) {
-  return (
-    <div className="scroll-thin -mx-5 overflow-x-auto">
-      <Table className="min-w-[1100px]">
-        <thead>
-          <tr>
-            <Th className="w-14">序号</Th>
-            <Th className="w-24">单位</Th>
-            <Th className="w-20">楼栋</Th>
-            <Th>问题描述</Th>
-            <Th className="w-24">状态</Th>
-            <Th className="w-[84px]">风险</Th>
-            <Th className="w-[280px]">进展 / 卡点</Th>
-            <Th className="w-20" align="right">挂账</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((i) => (
-            <Tr key={i.id} onClick={() => onOpen(i)}>
-              <Td className="num text-ink-3">{i.seq ?? '—'}</Td>
-              <Td className="text-ink-2">{i.unit}</Td>
-              <Td className="num font-medium">
-                {buildingShort(i.building)}
-                {i.floor && <span className="font-normal text-ink-3"> {i.floor}F</span>}
-              </Td>
-              <Td>
-                <span className="line-clamp-1 font-medium" title={i.description}>
-                  {i.description}
+    <Section title="高危隐患" count={summary?.radar.length} desc="外立面玻璃、排污堵塞、重复渗漏、责任未定等硬骨头，按风险分排序">
+      {loading ? (
+        <Skeleton className="h-72" />
+      ) : summary?.radar.length ? (
+        <ol>
+          {summary.radar.map((l, i) => (
+            <li key={l.id}>
+              <button
+                onClick={() => onOpen(l)}
+                className="-mx-2 grid w-[calc(100%+16px)] grid-cols-[22px_1fr_auto] items-start gap-2 rounded-md px-2 py-2 text-left hover:bg-subtle"
+              >
+                <span className="num pt-px text-[13px] text-ink-4">{i + 1}</span>
+                <span className="min-w-0">
+                  <span className="block truncate text-[14px] text-ink-1">{l.description}</span>
+                  <span className="block truncate text-[12px] text-ink-3">
+                    {l.unit} · {l.status} · 挂账 {fmtDays(l.ageDays)}
+                    {l.progress && ` · ${l.progress}`}
+                  </span>
                 </span>
-              </Td>
-              <Td>
-                <StatusBadge status={i.status} />
-              </Td>
-              <Td>
-                <RiskBadge level={i.risk.level} />
-              </Td>
-              <Td className="text-ink-2">
-                <span className="line-clamp-1" title={i.progress}>
-                  {i.progress || '—'}
-                </span>
-              </Td>
-              <Td align="right" className="text-ink-2">
-                {fmtDays(i.ageDays)}
-              </Td>
-            </Tr>
+                <span className="num pt-px text-[13px] font-medium text-crit-ink">{l.risk.score}</span>
+              </button>
+            </li>
           ))}
-        </tbody>
-      </Table>
+        </ol>
+      ) : (
+        <Empty title="暂无高危隐患" />
+      )}
+    </Section>
+  );
+}
+
+function UnitTable({
+  groups,
+  loading,
+  active,
+  onPick,
+  onExport,
+  exporting,
+}: {
+  groups: LegacySummary['groups'];
+  loading: boolean;
+  active: string;
+  onPick: (k: string) => void;
+  onExport: (k: string) => void;
+  exporting: string | null;
+}) {
+  return (
+    <Section title="按施工单位对账" desc="点击行切换下方清单 · 每个单位可单独导出索赔清单" flush>
+      {loading ? (
+        <Skeleton className="mt-4 h-60" />
+      ) : (
+        <Table>
+          <thead>
+            <tr>
+              <Th>单位</Th>
+              <Th align="right">挂账</Th>
+              <Th align="right">未闭环</Th>
+              <Th align="right">高危</Th>
+              <Th className="w-[34%]">状态分布</Th>
+              <Th />
+            </tr>
+          </thead>
+          <tbody>
+            {groups.map((g) => (
+              <Tr key={g.key} onClick={() => onPick(g.key)} className={clsx(active === g.key && 'bg-subtle')}>
+                <Td className="font-medium">{g.label}</Td>
+                <Td align="right">{g.total}</Td>
+                <Td align="right">{g.open}</Td>
+                <Td align="right" className={g.highRisk ? 'font-medium text-crit-ink' : 'text-ink-4'}>
+                  {g.highRisk}
+                </Td>
+                <Td>
+                  <div className="flex h-1.5 gap-[2px] overflow-hidden rounded-full" title={g.byStatus.map((x) => `${x.status} ${x.count}`).join(' · ')}>
+                    {g.byStatus.map((x) => (
+                      <span key={x.status} style={{ width: `${(x.count / Math.max(1, g.total)) * 100}%`, background: STATUS_COLOR[x.status] ?? '#d6d6d6' }} />
+                    ))}
+                  </div>
+                </Td>
+                <Td align="right">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    icon={<Download />}
+                    loading={exporting === g.key}
+                    onClick={(e) => (e.stopPropagation(), onExport(g.key))}
+                    aria-label={`导出 ${g.label} 索赔清单`}
+                    title={`导出 ${g.label} 索赔清单`}
+                  />
+                </Td>
+              </Tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-ink-3">
+        {Object.entries(STATUS_COLOR).map(([k, c]) => (
+          <span key={k} className="inline-flex items-center gap-1.5">
+            <span className="size-2 rounded-[2px]" style={{ background: c }} />
+            {k}
+          </span>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function GroupBlock({ label, items, onOpen, onMore }: { label: string; items: LegacyItem[]; onOpen: (i: LegacyItem) => void; onMore: () => void }) {
+  const LIMIT = 6;
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline gap-2 text-[13px]">
+        <span className="font-medium text-ink-1">{label}</span>
+        <span className="num text-ink-3">{items.length}</span>
+      </div>
+      {items.slice(0, LIMIT).map((i) => (
+        <LegacyRow key={i.id} item={i} onOpen={onOpen} />
+      ))}
+      {items.length > LIMIT && (
+        <button onClick={onMore} className="mt-1 text-[13px] text-ink-3 hover:text-ink-1">
+          查看 {label} 全部 {items.length} 项 →
+        </button>
+      )}
     </div>
   );
+}
+
+/** 例会用的对账摘要文本 */
+function digest(unit: string, items: LegacyItem[]) {
+  const open = items.filter((i) => i.isOpen);
+  const lines = open.map((i, n) => `${n + 1}. ${buildingName(i.building)}${i.floor ? ` ${i.floor}F` : ''} ${i.description}【${i.status}】${i.progress ? ` —— ${i.progress}` : ''}`);
+  return [`【湾谷园区 · ${unit} 施工遗留对账】截至 ${ymd(0)}，未闭环 ${open.length} 项：`, ...lines].join('\n');
 }
