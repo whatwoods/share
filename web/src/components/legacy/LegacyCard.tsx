@@ -9,7 +9,7 @@ export function LegacyCard({ item, onOpen, compact }: { item: LegacyItem; onOpen
     <button
       onClick={() => onOpen(item)}
       className={clsx(
-        'group relative w-full overflow-hidden rounded-[10px] border bg-surface text-left shadow-card transition-[border-color,box-shadow] duration-150 hover:shadow-pop',
+        'group relative w-full shrink-0 overflow-hidden rounded-[10px] border bg-surface text-left shadow-card transition-[border-color,box-shadow] duration-150 hover:shadow-pop',
         item.risk.level === 'high' && item.isOpen ? 'border-crit/25 hover:border-crit/45' : 'border-line hover:border-line-strong',
         compact ? 'p-3' : 'p-3.5',
       )}
@@ -28,7 +28,7 @@ export function LegacyCard({ item, onOpen, compact }: { item: LegacyItem; onOpen
       {!compact && item.progress && <p className="mt-1 line-clamp-2 text-caption text-ink-2">{item.progress}</p>}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <StatusBadge status={item.status} />
-        {item.risk.tags.slice(0, compact ? 2 : 4).map((tag) => (
+        {item.risk.tags.filter((tag) => tag !== item.status).slice(0, compact ? 2 : 4).map((tag) => (
           <Badge key={tag} tone="neutral">
             {tag}
           </Badge>

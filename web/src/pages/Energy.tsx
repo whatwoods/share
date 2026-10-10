@@ -55,7 +55,7 @@ export default function EnergyPage() {
           unit="kWh"
           icon={<Zap />}
           accent="energy"
-          delta={delta != null ? { value: delta, label: `昨日 ${fmtInt(o?.yesterdayKwh)} kWh，较同类日均`, upIsGood: false } : null}
+          delta={delta != null ? { value: delta, label: `昨日较同类日均（昨日 ${fmtInt(o?.yesterdayKwh)}）`, upIsGood: false } : null}
           foot={delta == null && o?.yesterdayKwh != null ? `昨日 ${fmtInt(o.yesterdayKwh)} kWh` : undefined}
         />
         <KpiCard loading={ov.isLoading} label="实时负荷" value={fmtInt(o?.realtimeLoadKw)} unit="kW" icon={<Gauge />} accent="energy" foot="CET 总进线回路合计" />

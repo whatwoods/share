@@ -44,7 +44,8 @@ export function ParkMap({
   const maxEnergy = Math.max(1, ...items.map((b) => b.energy.kwh30d ?? 0));
 
   return (
-    <div className="relative w-full overflow-hidden rounded-[12px] border border-line bg-[#f7f9fb]" style={{ aspectRatio: '16 / 8.4' }}>
+    <div className="scroll-thin overflow-x-auto">
+    <div className="relative w-full overflow-hidden max-md:min-w-[720px] rounded-[12px] border border-line bg-[#f7f9fb]" style={{ aspectRatio: '16 / 8.4' }}>
       {/* 底纹：场地网格 */}
       <div
         className="pointer-events-none absolute inset-0 opacity-60"
@@ -103,24 +104,29 @@ export function ParkMap({
             }}
           >
             <div className="flex items-start justify-between gap-1">
-              <span className={clsx('leading-none font-semibold tracking-tight', isPublic ? 'text-[clamp(11px,1vw,14px)]' : 'text-[clamp(12px,1.25vw,18px)]')}>
+              <span className={clsx('leading-none font-semibold tracking-tight whitespace-nowrap', isPublic ? 'text-[clamp(11px,1vw,14px)]' : 'text-[clamp(12px,1.25vw,18px)]')}>
                 {isPublic ? '公区 · 设备用房 / 室外' : b.short}
               </span>
-              {b.tickets.red > 0 && (
-                <span className="grid h-[16px] min-w-[16px] place-items-center rounded-full bg-crit px-1 text-[10px] leading-none font-semibold text-white shadow-sm" title="超时工单">
-                  {b.tickets.red}
-                </span>
-              )}
-            </div>
-            <div className="flex items-end justify-between gap-1 text-[clamp(9px,0.72vw,11px)] leading-tight opacity-80 max-sm:hidden">
-              <span className="num truncate">
-                {metric === 'energy' || metric === 'health' ? `${fmtCompact(b.energy.kwh30d)}` : metric === 'tickets' ? `${b.tickets.open} 单` : `${b.legacy.open} 项`}
+              <span className="flex shrink-0 items-center gap-0.5">
+                {metric !== 'legacy' && b.legacy.highRisk > 0 && (
+                  <span className="grid h-[16px] min-w-[16px] place-items-center rounded-full bg-legacy px-1 text-[10px] leading-none font-semibold text-white shadow-sm" title="高危遗留">
+                    {b.legacy.highRisk}
+                  </span>
+                )}
+                {b.tickets.red > 0 && (
+                  <span className="grid h-[16px] min-w-[16px] place-items-center rounded-full bg-crit px-1 text-[10px] leading-none font-semibold text-white shadow-sm" title="超时工单">
+                    {b.tickets.red}
+                  </span>
+                )}
               </span>
-              {metric !== 'legacy' && b.legacy.highRisk > 0 && <span title="高危遗留">⚠{b.legacy.highRisk}</span>}
+            </div>
+            <div className="num truncate text-[clamp(10px,0.75vw,11px)] leading-tight opacity-80">
+              {metric === 'energy' || metric === 'health' ? fmtCompact(b.energy.kwh30d) : metric === 'tickets' ? `未完成 ${b.tickets.open}` : `遗留 ${b.legacy.open}`}
             </div>
           </button>
         );
       })}
+    </div>
     </div>
   );
 }

@@ -50,7 +50,7 @@ export default function BuildingsPage() {
       <div className="flex flex-wrap items-center gap-3">
         <Segmented value={metric} onChange={(m) => setUrl({ m: m === 'health' ? null : m })} options={METRICS} />
         <MapLegend metric={metric} />
-        <span className="ml-auto text-caption text-ink-3">点击楼块联动查看 · 楼块厚度 = 近 30 天电量</span>
+        <span className="ml-auto text-caption text-ink-3 max-lg:hidden">红色角标 = 超时工单 · 紫色角标 = 高危遗留 · 楼块厚度 = 近 30 天电量</span>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-12">
@@ -224,13 +224,13 @@ function Stat({
 function MapLegend({ metric }: { metric: MapMetric }) {
   if (metric === 'health')
     return (
-      <div className="flex items-center gap-3 text-caption text-ink-2">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption text-ink-2">
         {[
           ['#ffffff', '#d9dfe7', '正常'],
           ['#fff8e6', '#f2cf75', '关注（临期 / 遗留未完成）'],
           ['#fdeeee', '#ec9a9a', '告警（超时 / 高危遗留）'],
         ].map(([bg, bd, t]) => (
-          <span key={t} className="inline-flex items-center gap-1.5">
+          <span key={t} className="inline-flex items-center gap-1.5 whitespace-nowrap">
             <span className="size-3 rounded-[3px] border" style={{ background: bg, borderColor: bd }} />
             {t}
           </span>

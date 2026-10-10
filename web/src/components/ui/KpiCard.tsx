@@ -58,11 +58,15 @@ export function KpiCard({ label, value, unit, icon, accent = 'energy', delta, fo
         <div className="skeleton h-8 w-28" />
       ) : (
         <div className="flex items-end justify-between gap-3">
-          <div className="flex min-w-0 items-baseline gap-1">
-            <span className="truncate text-kpi font-semibold tracking-tight text-ink-1">{value}</span>
+          <div className="flex shrink-0 items-baseline gap-1">
+            <span className="text-kpi whitespace-nowrap font-semibold tracking-tight text-ink-1">{value}</span>
             {unit && <span className="text-body text-ink-3">{unit}</span>}
           </div>
-          {spark && spark.length > 1 && <Sparkline values={spark} stroke={accentStroke[accent]} width={84} height={28} />}
+          {spark && spark.length > 1 && (
+            <div className="flex min-w-0 justify-end overflow-hidden">
+              <Sparkline values={spark} stroke={accentStroke[accent]} width={84} height={28} />
+            </div>
+          )}
         </div>
       )}
       {(delta || foot) && (

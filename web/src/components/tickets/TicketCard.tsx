@@ -10,7 +10,7 @@ export function TicketCard({ t, onOpen }: { t: Ticket; onOpen: (t: Ticket) => vo
   return (
     <button
       onClick={() => onOpen(t)}
-      className="group relative w-full overflow-hidden rounded-[10px] border border-line bg-surface p-3 pl-3.5 text-left shadow-card transition-[border-color,box-shadow,transform] duration-150 hover:border-line-strong hover:shadow-pop"
+      className="group relative w-full shrink-0 overflow-hidden rounded-[10px] border border-line bg-surface p-3 pl-3.5 text-left shadow-card transition-[border-color,box-shadow,transform] duration-150 hover:border-line-strong hover:shadow-pop"
     >
       <span className={clsx('absolute top-0 bottom-0 left-0 w-[3px]', bar[t.overdue])} aria-hidden />
       <div className="mb-1.5 flex items-center gap-1.5">

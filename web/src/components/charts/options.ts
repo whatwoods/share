@@ -204,7 +204,7 @@ export function heatmap(h: { days: string[]; hours: number[]; values: [number, n
       ...tooltipBase,
       trigger: 'item',
       formatter: (p: { value: [number, number, number] }) => {
-        const [di, hr, v] = p.value;
+        const [hr, di, v] = p.value;
         return tipTitle(`${h.days[di]} ${String(hr).padStart(2, '0')}:00–${String(hr + 1).padStart(2, '0')}:00`) + tipRow(C.energy, `${fmtInt(v)} kWh`, '时段电量', false);
       },
     },
@@ -239,7 +239,8 @@ export function heatmap(h: { days: string[]; hours: number[]; values: [number, n
     series: [
       {
         type: 'heatmap',
-        data: h.values,
+        // contract 为 [dayIndex, hour, kwh]；ECharts 需要 [x=hour, y=day, value]
+        data: h.values.map(([d, hr, v]) => [hr, d, v]),
         itemStyle: { borderColor: C.surface, borderWidth: 2, borderRadius: 3 },
         emphasis: { itemStyle: { borderColor: C.ink1, borderWidth: 1 } },
       },

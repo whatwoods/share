@@ -188,7 +188,7 @@ function Topbar() {
   return (
     <header className="flex h-14 shrink-0 items-center gap-4 border-b border-line bg-surface/90 px-6 backdrop-blur max-md:px-4">
       <MobileNav />
-      <h1 className="min-w-0 flex-1 truncate text-[16px] font-semibold text-ink-1">{title}</h1>
+      <h1 className="min-w-0 flex-1 truncate text-[16px] max-md:invisible font-semibold text-ink-1">{title}</h1>
       <div className="hidden items-center gap-1.5 text-caption text-ink-3 sm:flex" title={last?.message}>
         <span className={clsx('size-1.5 rounded-full', last ? (last.ok ? 'bg-good' : 'bg-crit') : 'bg-ink-4')} />
         {running ? '正在同步…' : `上次同步 ${fmtRelative(last?.finishedAt ?? last?.startedAt)}`}

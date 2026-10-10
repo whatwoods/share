@@ -68,7 +68,7 @@ export default function HomePage() {
           <CardHeader
             icon={<Building2 className="size-4" />}
             title="园区楼宇态势"
-            subtitle="颜色 = 综合健康度 · 红色角标 = 超时工单数 · 点击进入楼宇全景"
+            subtitle="颜色 = 综合健康度 · 红色角标 = 超时工单 · 紫色角标 = 高危遗留 · 点击进入全景"
             actions={
               <Link to="/buildings" className="inline-flex items-center gap-1 text-caption font-medium text-brand-ink hover:underline">
                 全景视图 <ArrowRight className="size-3" />

@@ -20,7 +20,7 @@ export function LegacyDrawer({ item, onClose }: { item: LegacyItem | null; onClo
           <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={i.status} />
             <RiskBadge level={i.risk.level} score={i.risk.score} />
-            {i.risk.tags.map((t) => (
+            {i.risk.tags.filter((t) => t !== i.status).map((t) => (
               <Badge key={t} tone="neutral">
                 {t}
               </Badge>
