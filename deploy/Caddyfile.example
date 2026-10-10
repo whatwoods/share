@@ -1,0 +1,5 @@
+# 追加到现有 Caddyfile（替换为实际域名）
+ops.example.com {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:3300
+}

@@ -1,0 +1,17 @@
+# systemd 单元（与 PM2 二选一）
+# sudo cp deploy/wangu-ops.service /etc/systemd/system/ && sudo systemctl daemon-reload && sudo systemctl enable --now wangu-ops
+[Unit]
+Description=Wangu Park Ops Console
+After=network.target nenghao.service
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/wangu-ops
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/env node --disable-warning=ExperimentalWarning dist/server/index.js
+Restart=always
+RestartSec=3
+User=www-data
+
+[Install]
+WantedBy=multi-user.target
