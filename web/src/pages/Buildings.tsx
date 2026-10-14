@@ -74,7 +74,7 @@ export default function BuildingsPage() {
           <div className="flex items-baseline gap-3">
             <h2 className="text-[28px] leading-9 font-semibold tight">{card?.name ?? d?.building.name ?? '—'}</h2>
             <span className="text-[14px] text-ink-3">
-              {card?.kind === 'office' ? '研发办公' : card?.kind === 'apartment' ? '公寓及配套' : card?.kind === 'public' ? '公共区域 · 设备用房' : ''}
+              {card?.kind === 'office' ? '办公区' : card?.kind === 'apartment' ? '生活区' : card?.kind === 'public' ? '公共区域 · 设备用房' : ''}
             </span>
           </div>
 

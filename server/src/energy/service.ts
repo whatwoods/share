@@ -76,10 +76,10 @@ async function withFallback<T>(endpoint: string, key: string, ttl: number, live:
   }
 }
 
-/** 能耗整体数据模式：任一接口最近 10 分钟内回退过 → mock；无记录时探测 /api/meta */
+/** 能耗整体数据模式：任一核心接口最近 10 分钟内回退过 → mock；无记录时探测 /api/meta */
 export async function energyMode(): Promise<DataMode> {
   if (forcedMock()) return 'mock';
-  const recent = [...outcomes.values()].filter((o) => Date.now() - o.at < TTL_LONG);
+  const recent = [...outcomes.values()].filter((o) => Date.now() - o.at < TTL_LONG && o.endpoint !== 'solar');
   if (recent.some((o) => !o.ok)) return 'mock';
   if (recent.length) return 'live';
   const r = await withFallback('meta', 'meta', TTL_LONG, () => nenghao.meta(), () => null);

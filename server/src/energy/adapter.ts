@@ -62,7 +62,7 @@ export const FIELD_CANDIDATES = {
   /** 分项容器 */
   category: ['byCategory', 'by_category', 'categories', 'category', 'byType', 'by_type', 'types', 'typeStats', '分项'],
   /** 楼栋容器 */
-  buildings: ['buildings', 'byBuilding', 'by_building', 'building', 'items', 'list', 'rows'],
+  buildings: ['summary', 'buildings', 'byBuilding', 'by_building', 'building', 'items', 'list', 'rows'],
   /** 名称键（楼栋/分项） */
   name: ['name', 'building', 'area', 'type', 'category', 'label', 'key', 'title', '楼栋', '分项'],
   /** 热力图 */

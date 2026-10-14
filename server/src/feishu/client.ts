@@ -103,15 +103,62 @@ export class FeishuClient {
       const qs = new URLSearchParams({ page_size: '500' });
       if (pageToken) qs.set('page_token', pageToken);
       const url = `${this.opts.baseUrl}/open-apis/bitable/v1/apps/${encodeURIComponent(baseToken)}/tables/${encodeURIComponent(tableId)}/records?${qs}`;
-      const body = await this.request<{
+      let body: {
         data?: { items?: FeishuRecord[] | null; has_more?: boolean; page_token?: string; total?: number };
-      }>(url, { method: 'GET', headers: { Authorization: `Bearer ${token}` } });
+      };
+      try {
+        body = await this.request(url, { method: 'GET', headers: { Authorization: `Bearer ${token}` } });
+      } catch (err: unknown) {
+        if (err instanceof FeishuError && err.code === 1254302) {
+          return this.listAllRecordsViaLarkCli(baseToken, tableId);
+        }
+        throw err;
+      }
       const items = body.data?.items ?? [];
       for (const it of items) {
         if (it && typeof it.record_id === 'string') out.push({ record_id: it.record_id, fields: it.fields ?? {} });
       }
       if (!body.data?.has_more || !body.data.page_token) break;
       pageToken = body.data.page_token;
+    }
+    return out;
+  }
+
+  /** 当多维表格开启高级权限导致应用身份 1254302 时，无缝回退到本机 lark-cli 用户授权拉取 */
+  private async listAllRecordsViaLarkCli(baseToken: string, tableId: string): Promise<FeishuRecord[]> {
+    const { execFile } = await import('node:child_process');
+    const { promisify } = await import('node:util');
+    const execFileAsync = promisify(execFile);
+    const out: FeishuRecord[] = [];
+    let offset = 0;
+    const limit = 200;
+    while (true) {
+      const { stdout } = await execFileAsync('lark-cli', [
+        'base', '+record-list',
+        '--base-token', baseToken,
+        '--table-id', tableId,
+        '--offset', String(offset),
+        '--limit', String(limit),
+        '--as', 'user',
+        '--json',
+      ], { maxBuffer: 15 * 1024 * 1024 });
+      const res = JSON.parse(stdout);
+      if (!res.ok || !res.data) break;
+      const dataRows = (res.data.data as unknown[][]) || [];
+      const fields = (res.data.fields as string[]) || [];
+      const recordIds = (res.data.record_id_list as string[]) || [];
+      for (let i = 0; i < dataRows.length; i++) {
+        const rowObj: Record<string, unknown> = {};
+        for (let j = 0; j < fields.length; j++) {
+          rowObj[fields[j]] = dataRows[i][j];
+        }
+        out.push({
+          record_id: recordIds[i],
+          fields: rowObj,
+        });
+      }
+      if (dataRows.length < limit || !res.data.has_more) break;
+      offset += dataRows.length;
     }
     return out;
   }

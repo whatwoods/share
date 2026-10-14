@@ -14,7 +14,7 @@ export type BuildingCode =
   | 'B11' | 'B12' | 'B13' | 'B14' | 'B15' | 'B16' | 'B17' | 'B18' | 'B19'
   | 'PUBLIC' | 'UNKNOWN';
 
-/** office: 1~11 号楼办公；apartment: 12~19 号楼公寓及配套研发办公；public: 公区 */
+/** office: 1~11 号楼办公区；apartment: 12~19 号楼生活区；public: 公区 */
 export type BuildingKind = 'office' | 'apartment' | 'public' | 'unknown';
 
 export interface BuildingInfo {
