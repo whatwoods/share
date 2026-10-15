@@ -21,7 +21,7 @@ import { shDate } from '../lib/time';
 
 /* ───────────────────────── 可调参数 ───────────────────────── */
 
-export const NENGHAO_TIMEOUT_MS = 3000;
+export const NENGHAO_TIMEOUT_MS = 15000;
 
 /** 允许通过 /api/energy/_raw 透传的 nenghao 路径白名单 */
 export const RAW_PATH_WHITELIST = [

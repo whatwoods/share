@@ -141,7 +141,15 @@ export class FeishuClient {
         '--limit', String(limit),
         '--as', 'user',
         '--json',
-      ], { maxBuffer: 15 * 1024 * 1024 });
+      ], {
+        maxBuffer: 15 * 1024 * 1024,
+        env: {
+          ...process.env,
+          HOME: '/root',
+          HERMES_HOME: '/root/.hermes',
+          PATH: process.env.PATH || '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+        },
+      });
       const res = JSON.parse(stdout);
       if (!res.ok || !res.data) break;
       const dataRows = (res.data.data as unknown[][]) || [];
