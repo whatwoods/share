@@ -309,6 +309,7 @@ animation:ldin .6s var(--e) var(--l2) both, lev .8s var(--e) calc(var(--l4) + .1
 <div id="caps"></div>
 <div id="bar"></div>
 </div>
+<script src="audio/voice_timing.js"></script>
 <script>
 // ===== Script: [[x]] = highlight. Timing derived from reading speed. =====
 const SCRIPT={
@@ -323,15 +324,16 @@ const SCRIPT={
 };
 const CPS=5.8; // chars per second
 function dur(t){t=t.replace(/\[\[|\]\]/g,'');const cjk=(t.match(/[一-鿿]/g)||[]).length;const words=(t.match(/[A-Za-z0-9.\-]+/g)||[]).length;const p=(t.match(/[，。；：、,]/g)||[]).length;return Math.max(1.6,(cjk+words*2.2+p*.6)/CPS+.15)}
-let T=.1;const caps=document.getElementById('caps');const timeline=[];
+let T=.1,K=0;const caps=document.getElementById('caps');const timeline=[];
 for(const [id,lines] of Object.entries(SCRIPT)){
  const sec=document.getElementById(id);const s0=T;
- lines.forEach((ln,i)=>{const nocap=ln[0]==='!';ln=ln.replace(/^!/,'');const d=dur(ln);sec.style.setProperty('--l'+i,T.toFixed(2)+'s');
+ lines.forEach((ln,i)=>{const nocap=ln[0]==='!';ln=ln.replace(/^!/,'');let d=dur(ln);if(window.VO){const v=VO.lines[K++];T=v.t;d=v.d}sec.style.setProperty('--l'+i,T.toFixed(2)+'s');
   const c=document.createElement('div');c.className='cap';c.style.setProperty('--s',T.toFixed(2)+'s');c.style.setProperty('--d',d.toFixed(2)+'s');
   c.innerHTML='<span>'+ln.replace(/\[\[(.+?)\]\]/g,'<b>$1</b>')+'</span>';if(!nocap)caps.appendChild(c);timeline.push({id,t:T,d,text:ln.replace(/\[\[|\]\]/g,'')});T+=d;});
  for(let i=lines.length;i<6;i++)sec.style.setProperty('--l'+i,T.toFixed(2)+'s');
- T+=.3; sec.style.setProperty('--s',(s0-.2).toFixed(2)+'s');sec.style.setProperty('--d',(T-s0+.2).toFixed(2)+'s');
+ if(!window.VO)T+=.3; sec.style.setProperty('--s',(s0-.2).toFixed(2)+'s');sec.style.setProperty('--d',(T-s0+.2).toFixed(2)+'s');
 }
+if(window.VO)T=VO.T;
 document.getElementById('stage').style.setProperty('--T',T.toFixed(2)+'s');
 window.TOTAL=T;window.TIMELINE=timeline;
 
