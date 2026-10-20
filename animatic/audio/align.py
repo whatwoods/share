@@ -15,7 +15,12 @@ LEAD, GAP_LINE, GAP_SCENE, TAIL = .1, .12, .35, 1.2
 MAX_TOTAL = 89.5
 
 
-def silences(path, db=-38, d=.18):
+def weight(t):
+    cjk = len(re.findall(r'[\u4e00-\u9fff]', t)); words = len(re.findall(r'[A-Za-z0-9.\-]+', t)); p = len(re.findall(r'[，。；：、？,?]', t))
+    return cjk + words * 2.2 + p * .6
+
+
+def silences(path, db=-38, d=.08):
     log = subprocess.run(['ffmpeg', '-hide_banner', '-i', path, '-af', f'silencedetect=noise={db}dB:d={d}', '-f', 'null', '-'],
                          capture_output=True, text=True).stderr
     st = [float(x) for x in re.findall(r'silence_start: ([\d.]+)', log)]
@@ -31,22 +36,48 @@ def main():
     if x.ndim > 1: x = x.mean(1)
     total = len(x) / sr
     sil = silences(raw)
-    # 去掉首尾静音，在中间的停顿里挑最长的 N-1 个作为句界
+    # 去掉首尾静音
     head = sil[0][1] if sil and sil[0][0] < .05 else 0
     tail = sil[-1][0] if sil and sil[-1][1] > total - .05 else total
-    inner = [s for s in sil if s[0] > head and s[1] < tail]
+    cand = [s for s in sil if s[0] > head and s[1] < tail]
     need = len(lines) - 1
-    if len(inner) < need:
-        sys.exit(f'只检测到 {len(inner)} 个停顿，少于 {need} 个句界；可调低 silencedetect 的 d 或检查音频')
-    cuts = sorted(sorted(inner, key=lambda s: s[1] - s[0], reverse=True)[:need])
-    bounds = [head] + [c for s in cuts for c in s] + [tail]
-    segs = [(bounds[2 * i], bounds[2 * i + 1]) for i in range(len(lines))]
+    if len(cand) < need:
+        sys.exit(f'只检测到 {len(cand)} 个停顿，少于 {need} 个句界')
+    # 动态规划选句界：每句时长接近按字数估算的时长，同时偏好较长的停顿
+    w = [weight(l['text']) for l in lines]
+    rate = (tail - head) / sum(w)
+    exp = [x * rate for x in w]
+    M = len(cand)
+    pos = [head] + [c[0] for c in cand]          # 句子结束点 = 停顿开始
+    nxt = [head] + [c[1] for c in cand]          # 下一句开始 = 停顿结束
+    bonus = [0] + [min(c[1] - c[0], .6) * 10 for c in cand]
+    def seg(k, a, b_end):
+        d = b_end - nxt[a]; e = exp[k]
+        return ((d - e) / (.22 * e + .3)) ** 2
+    INF = float('inf')
+    dp = [[INF] * (M + 1) for _ in range(len(lines))]; bk = [[0] * (M + 1) for _ in range(len(lines))]
+    for j in range(1, M + 1):
+        dp[0][j] = seg(0, 0, pos[j]) - bonus[j]
+    for k in range(1, need):
+        for j in range(k + 1, M + 1):
+            best, arg = INF, 0
+            for i in range(k, j):
+                v = dp[k - 1][i] + seg(k, i, pos[j])
+                if v < best: best, arg = v, i
+            dp[k][j] = best - bonus[j]; bk[k][j] = arg
+    last = min(range(need, M + 1), key=lambda j: dp[need - 1][j] + seg(need, j, tail))
+    picks = [last]
+    for k in range(need - 1, 0, -1): picks.append(bk[k][picks[-1]])
+    picks = picks[::-1]
+    starts = [head] + [nxt[j] for j in picks]
+    ends = [pos[j] for j in picks] + [tail]
+    segs = list(zip(starts, ends))
 
     # 体检：每句时长/字数比，偏离中位数太多说明切错了
-    rate = [(e - s) / max(1, len(l['text'])) for (s, e), l in zip(segs, lines)]
+    rate = [(e - s) / weight(l['text']) for (s, e), l in zip(segs, lines)]
     med = float(np.median(rate))
     for i, ((s, e), l, r) in enumerate(zip(segs, lines, rate)):
-        flag = '  <-- 可疑' if r < med * .5 or r > med * 1.8 else ''
+        flag = '  <-- 可疑' if r < med * .6 or r > med * 1.6 else ''
         print(f'{i:2d} {s:6.2f}-{e:6.2f} ({e - s:4.2f}s) {l["text"][:22]}{flag}')
 
     # 重新拼接：句间/场景间的停顿由我们控制
