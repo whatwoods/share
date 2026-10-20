@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8">
+<title>DeepInfer 封面</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;700;900&family=JetBrains+Mono:wght@500;700&display=block" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0B0E14;--blue:#4D6BFE;--blue2:#8FA2FF;--mint:#3DDC97;--fg:#E6EDF3;--dim:#6E7681}
+body{background:var(--bg);font-family:'Noto Sans SC',sans-serif;color:var(--fg);overflow:hidden}
+#c{position:relative;overflow:hidden;background:var(--bg)}
+.grid{position:absolute;inset:0;background-image:linear-gradient(rgba(110,118,129,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(110,118,129,.08) 1px,transparent 1px);background-size:60px 60px}
+.glow{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(77,107,254,.45),transparent 65%)}
+.rain{position:absolute;inset:0;opacity:.13;-webkit-mask-image:radial-gradient(ellipse at center,transparent 30%,#000 85%)}
+.rain div{position:absolute;top:-40px;font-family:'JetBrains Mono';font-size:22px;line-height:1.9;color:var(--blue2);white-space:nowrap}
+.gear{position:absolute}
+.top{position:absolute;display:flex;align-items:center;gap:22px}
+.top b{font-family:'JetBrains Mono';font-weight:700}
+.top i{font-style:normal;border:2px solid var(--blue2);color:var(--blue2);border-radius:10px;font-family:'JetBrains Mono'}
+.l1{position:absolute;font-weight:700;color:#C9D1D9}
+.big{position:absolute;font-weight:900;line-height:1;color:#fff;text-shadow:0 0 70px rgba(77,107,254,.95),0 0 24px rgba(77,107,254,.9);letter-spacing:4px}
+.stamp{position:absolute;transform:rotate(-4deg);font-weight:900;color:var(--mint);border:9px solid var(--mint);border-radius:24px;background:rgba(11,14,20,.88);box-shadow:0 0 60px rgba(61,220,151,.45)}
+.foot{position:absolute;display:flex;gap:16px}
+.foot span{border:2px solid #30363D;border-radius:999px;font-weight:700;background:rgba(11,14,20,.7)}
+.foot span.k{border-color:var(--blue2);color:var(--blue2);font-family:'JetBrains Mono'}
+
+/* 竖版 3:4 */
+.p #c{width:1080px;height:1440px}
+.p .glow{width:1100px;height:1100px;left:-10px;top:240px}
+.p .gear{left:140px;top:430px;width:800px;height:800px}
+.p .top{left:80px;top:90px}.p .top b{font-size:52px}.p .top i{font-size:30px;padding:4px 16px}
+.p .l1{left:0;right:0;top:300px;text-align:center;font-size:66px}
+.p .big{left:0;right:0;top:470px;text-align:center;font-size:300px}
+.p .stamp{left:50%;margin-left:-250px;top:850px;width:500px;text-align:center;font-size:150px;padding:6px 0}
+.p .foot{left:0;right:0;top:1250px;justify-content:center}.p .foot span{font-size:36px;padding:12px 30px}
+
+/* 横版 4:3 */
+.l #c{width:1440px;height:1080px}
+.l .glow{width:1000px;height:1000px;left:420px;top:60px}
+.l .gear{left:660px;top:190px;width:700px;height:700px}
+.l .top{left:90px;top:90px}.l .top b{font-size:50px}.l .top i{font-size:28px;padding:4px 16px}
+.l .l1{left:90px;top:300px;font-size:64px}
+.l .big{left:80px;top:400px;font-size:280px}
+.l .stamp{left:100px;top:740px;font-size:120px;padding:4px 44px}
+.l .foot{right:90px;top:950px}.l .foot span{font-size:34px;padding:10px 28px}
+</style></head>
+<body>
+<div id="c">
+ <div class="glow"></div><div class="grid"></div>
+ <div class="rain" id="rain"></div>
+ <svg class="gear" viewBox="0 0 700 700" fill="none"><circle cx="350" cy="350" r="290" stroke="#4D6BFE" stroke-width="54" stroke-dasharray="38 28" opacity=".6"/><circle cx="350" cy="350" r="205" stroke="#8FA2FF" stroke-width="3" opacity=".55"/><circle cx="350" cy="350" r="70" stroke="#8FA2FF" stroke-width="3" opacity=".55"/></svg>
+ <div class="top"><b>DeepSeek</b><i>DeepInfer</i></div>
+ <div class="l1">把自家 API 背后的</div>
+ <div class="big">发动机</div>
+ <div class="stamp">开源了</div>
+ <div class="foot"><span class="k">推测解码</span><span class="k">专家并行</span><span>77 秒看懂</span></div>
+</div>
+<script>
+document.body.className = new URLSearchParams(location.search).get('o') === 'l' ? 'l' : 'p';
+const src=['你好 世界 的 了 是 推理 token','{"id":42,"delta":"好"}','stream: true ▍ 200 OK','data: {"content":"答"}','Hello ▍ infer ▍ token','中 大 为 上 个 我 以 要'];
+let h='';for(let i=0;i<12;i++){let col=[];for(let k=0;k<60;k++)col.push(src[(i+k)%src.length]);h+=`<div style="left:${20+i*125}px;top:${-((i*137)%300)}px">${col.join('<br>')}</div>`}
+document.getElementById('rain').innerHTML=h;
+</script>
+</body></html>
