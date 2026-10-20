@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;900&family=JetBrains+Mono:wght@400;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="base.css"><style>
+.stage{height:auto}
+.router{margin:0 auto;width:300px;text-align:center;border:2px solid var(--fg);border-radius:40px;padding:18px;font-size:34px}
+.fan{height:90px;margin:0 auto;width:808px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.ex{height:150px;border:2px solid var(--line);border-radius:8px;position:relative;padding:14px 18px;font-size:26px;color:var(--dim);overflow:hidden}
+.ex.on{border-color:var(--blue);color:var(--fg)}
+.ld{position:absolute;left:0;right:0;bottom:0;background:rgba(77,107,254,.18);border-top:2px solid var(--blue)}
+.gpus{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:18px}
+.gpus div{border-top:2px dashed var(--dim);padding-top:10px;font-size:24px;color:var(--dim);text-align:center}
+.eplb{margin-top:40px;font-size:28px}
+</style></head><body><div class="tag mono"><b>DeepInfer</b> / 看家本领 02 · 03</div>
+<h1>专家分工</h1>
+<div class="sub">MoE 专家并行 · <span class="mono">EPLB</span></div>
+<div class="stage">
+<div class="router mono">token</div>
+<svg class="fan" viewBox="0 0 808 90" fill="none" stroke-width="2"><line x1="404" y1="0" x2="303" y2="90" stroke="#4D6BFE"/><line x1="404" y1="0" x2="101" y2="90" stroke="#30363D"/><line x1="404" y1="0" x2="505" y2="90" stroke="#30363D"/><line x1="404" y1="0" x2="707" y2="90" stroke="#30363D"/></svg>
+<div class="grid"><div class="ex"><span class="mono">E0</span><div class="ld" style="height:62%"></div></div><div class="ex on"><span class="mono">E1</span><div class="ld" style="height:70%"></div></div><div class="ex"><span class="mono">E2</span><div class="ld" style="height:66%"></div></div><div class="ex"><span class="mono">E3</span><div class="ld" style="height:58%"></div></div><div class="ex on"><span class="mono">E4</span><div class="ld" style="height:72%"></div></div><div class="ex"><span class="mono">E5</span><div class="ld" style="height:64%"></div></div><div class="ex on"><span class="mono">E6</span><div class="ld" style="height:68%"></div></div><div class="ex"><span class="mono">E7</span><div class="ld" style="height:60%"></div></div></div>
+<div class="gpus mono"><div>卡 0 – 3</div><div>卡 4 – 7</div></div>
+<div class="eplb">每个 token 只叫醒少数几位专家（<span class="hl">高亮</span>）<br><span class="lbl">EPLB：把忙的专家多复制几份，让每张卡负载接近</span></div>
+</div>
+<div class="cap"><span>把"专家"分到不同的卡上，还不能有人闲着</span></div>
+<div class="prog"><div class="on"></div><div class="on"></div><div></div></div></body></html>

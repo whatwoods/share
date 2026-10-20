@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;900&family=JetBrains+Mono:wght@400;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="base.css"><style>
+.stage{border-color:var(--amber)}
+.it{display:flex;align-items:center;gap:24px;font-size:38px;padding:20px 0;border-bottom:1px solid var(--line)}
+.it:last-child{border:none}
+.it i{font-style:normal;font-family:'JetBrains Mono';width:48px;text-align:center;font-weight:700}
+.y i{color:var(--blue)}.n{color:var(--dim)}.n i{color:var(--amber)}
+.sec{font-size:26px;color:var(--dim);margin:28px 0 6px}.sec:first-child{margin-top:0}
+.tag b.a{color:var(--amber)}
+.note{position:absolute;top:1340px;left:86px;right:86px;font-size:28px;color:var(--dim);line-height:1.6}
+.note b{color:var(--fg);font-weight:500}
+</style></head><body><div class="tag mono"><b class="a">DeepInfer</b> / 先说清楚</div>
+<h1>还缺几块</h1>
+<div class="sub">本次只开源 · <span style="color:var(--amber)">离线推理</span></div>
+<div class="stage">
+<div class="sec">这次有</div>
+<div class="it y"><i>✓</i>推理引擎 + 高性能算子</div>
+<div class="sec">这次没有</div>
+<div class="it n"><i>✕</i>KV 缓存系统</div>
+<div class="it n"><i>✕</i>预填充 / 解码分离（PD 分离）</div>
+<div class="it n"><i>✕</i>多副本负载均衡</div>
+</div>
+<div class="note">目前仅支持 <b class="mono">DeepSeek-V4.1-Flash</b>；<br>主要基于 <b class="mono">vLLM</b> 构建，参考了 SGLang、TensorRT-LLM。</div>
+<div class="cap"><span>普通人拿它，还搭不出一套完整的 API 服务</span></div></body></html>

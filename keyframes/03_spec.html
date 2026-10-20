@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;900&family=JetBrains+Mono:wght@400;700&display=block" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1920px;background:#0D1117;font-family:'Noto Sans SC',sans-serif;color:#E6EDF3;position:relative;overflow:hidden;
+background-image:radial-gradient(rgba(110,118,129,.28) 2px,transparent 2px);background-size:40px 40px}
+.mono{font-family:'JetBrains Mono',monospace}
+.tag{position:absolute;top:120px;left:86px;font-size:30px;color:#6E7681;letter-spacing:2px}
+.tag b{color:#4D6BFE;font-weight:700}
+h1{position:absolute;top:200px;left:86px;font-size:150px;font-weight:900;letter-spacing:6px}
+.sub{position:absolute;top:400px;left:90px;font-size:40px;color:#6E7681}
+.sub span{color:#4D6BFE}
+.stage{position:absolute;top:560px;left:86px;width:908px;height:560px;border:2px solid #30363D;border-radius:12px;padding:56px 48px}
+.row{display:flex;gap:12px;align-items:center}
+.lbl{font-size:26px;color:#6E7681;margin-bottom:22px}
+.tok{height:96px;min-width:96px;padding:0 18px;white-space:nowrap;border:2px solid #E6EDF3;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;font-weight:500}
+.tok.in{border-color:#6E7681;color:#6E7681}
+.tok.d{border:2px dashed #4D6BFE;color:#4D6BFE}
+.tok.ok{border:2px solid #4D6BFE;background:rgba(77,107,254,.14);color:#E6EDF3}
+.tok.no{border:2px dashed #6E7681;color:#6E7681;text-decoration:line-through}
+.arrow{margin:34px 0 34px 8px;font-size:26px;color:#6E7681;display:flex;align-items:center;gap:18px}
+.arrow i{display:inline-block;width:2px;height:60px;background:#4D6BFE}
+.chip{position:absolute;top:1170px;left:86px;font-size:28px;border:1px solid #4D6BFE;border-radius:8px;padding:14px 22px;color:#E6EDF3}
+.chip em{color:#4D6BFE;font-style:normal}
+.cap{position:absolute;bottom:300px;left:0;right:0;text-align:center}
+.cap span{display:inline-block;background:rgba(0,0,0,.55);padding:18px 32px;font-size:44px;font-weight:500;border-radius:6px}
+.prog{position:absolute;bottom:160px;left:86px;right:86px;display:flex;gap:14px}
+.prog div{flex:1;height:6px;background:#30363D;border-radius:3px}.prog .on{background:#4D6BFE}
+</style></head><body>
+<div class="tag mono"><b>DeepInfer</b> / 看家本领 01 · 03</div>
+<h1>猜着写</h1>
+<div class="sub">推测解码 · <span class="mono">Speculative Decoding</span></div>
+<div class="stage">
+ <div class="lbl">① 一口气打 5 个草稿</div>
+ <div class="row"><div class="tok in">今天</div><div class="tok d">天气</div><div class="tok d">真</div><div class="tok d">不错</div><div class="tok d">，</div><div class="tok d">去</div></div>
+ <div class="arrow"><i></i>② 模型一次验证全部草稿</div>
+ <div class="row"><div class="tok in">今天</div><div class="tok ok">天气</div><div class="tok ok">真</div><div class="tok ok">不错</div><div class="tok ok">，</div><div class="tok no">去</div></div>
+ <div class="lbl" style="margin-top:28px">③ 接受 4 个 → 一步顶四步</div>
+</div>
+<div class="chip mono"><em>$</em> DEEPINFER_ENABLE_MTP_VARLEN=1</div>
+<div class="cap"><span>先打几个草稿 token，再一次性验证</span></div>
+<div class="prog"><div class="on"></div><div></div><div></div></div>
+</body></html>

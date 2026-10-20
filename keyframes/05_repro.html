@@ -1,0 +1,21 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;900&family=JetBrains+Mono:wght@400;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="base.css"><style>
+.out{border:2px solid var(--line);border-radius:8px;padding:26px 30px;font-size:28px;line-height:1.6}
+.out .k{color:var(--blue)}
+.eq{text-align:center;font-size:72px;color:var(--blue);line-height:1;margin:18px 0}
+.row2{display:flex;gap:24px;margin-top:44px}
+.row2 .chip{font-size:24px}
+</style></head><body><div class="tag mono"><b>DeepInfer</b> / 看家本领 03 · 03</div>
+<h1>说到做到</h1>
+<div class="sub">确定性采样 · <span>结构化输出</span></div>
+<div class="stage">
+<div class="lbl" style="margin-bottom:18px">第 1 次运行 · seed=42</div>
+<div class="out mono">{ <span class="k">"city"</span>: "杭州", <span class="k">"temp"</span>: 23 }</div>
+<div class="eq">=</div>
+<div class="lbl" style="margin-bottom:18px">第 2 次运行 · seed=42</div>
+<div class="out mono">{ <span class="k">"city"</span>: "杭州", <span class="k">"temp"</span>: 23 }</div>
+<div class="row2 mono"><span class="chip"><em>$</em> DEEPINFER_BATCH_INVARIANT=1</span><span class="chip">regex · JSON · EBNF</span></div>
+</div>
+<div class="cap"><span>同样输入一字不差，还能强制 JSON 输出</span></div>
+<div class="prog"><div class="on"></div><div class="on"></div><div class="on"></div></div></body></html>

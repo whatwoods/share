@@ -1,0 +1,26 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;900&family=JetBrains+Mono:wght@400;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="base.css"><style>
+.flow{position:absolute;top:600px;left:86px;width:908px;display:flex;flex-direction:column;align-items:center;gap:0}
+.node{width:640px;border:2px solid var(--fg);border-radius:12px;padding:30px 40px;display:flex;align-items:center;gap:34px}
+.node svg{flex:none}
+.node .t{font-size:44px;font-weight:900}.node .s{font-size:26px;color:var(--dim);margin-top:6px}
+.node.k{border-color:var(--blue);background:rgba(77,107,254,.10)}
+.node.k .t{color:var(--blue)}
+.link{width:2px;height:70px;background:var(--dim);position:relative}
+.link.b{background:var(--blue)}
+.badge{position:absolute;right:-260px;top:50%;transform:translateY(-50%);font-size:24px;color:var(--amber);white-space:nowrap}
+</style></head><body><div class="tag mono"><b>DeepInfer</b> / 打个比方</div>
+<h1>菜谱与后厨</h1>
+<div class="sub">模型 = 菜谱 · <span>推理框架 = 后厨</span></div>
+<div class="flow">
+<div class="node"><svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="#E6EDF3" stroke-width="3"><rect x="14" y="8" width="52" height="64" rx="4"/><line x1="24" y1="26" x2="56" y2="26"/><line x1="24" y1="38" x2="56" y2="38"/><line x1="24" y1="50" x2="44" y2="50"/></svg>
+<div><div class="t">菜谱 · 模型权重</div><div class="s">早就公开，人人能下载</div></div></div>
+<div class="link"></div>
+<div class="node k"><svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="#4D6BFE" stroke-width="3"><rect x="8" y="40" width="64" height="30" rx="3"/><circle cx="26" cy="40" r="10"/><circle cx="54" cy="40" r="10"/><line x1="26" y1="22" x2="26" y2="12"/><line x1="54" y1="22" x2="54" y2="12"/></svg>
+<div><div class="t">后厨 · 推理框架</div><div class="s">怎么排班、怎么同时出几百桌</div></div></div>
+<div class="link b"></div>
+<div class="node"><svg width="80" height="80" viewBox="0 0 80 80" fill="none" stroke="#E6EDF3" stroke-width="3"><path d="M10 50 Q40 10 70 50 Z"/><line x1="6" y1="56" x2="74" y2="56"/><circle cx="40" cy="22" r="3"/></svg>
+<div><div class="t">上菜 · 你收到的回答</div><div class="s">快不快、贵不贵，看后厨</div></div></div>
+</div>
+<div class="cap"><span>以前只公开菜谱，现在后厨也打开了</span></div></body></html>
