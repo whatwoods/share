@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;900&family=Noto+Sans+SC:wght@400;500&family=IBM+Plex+Mono:wght@400&display=block" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1920px;background:#F4EFE6;font-family:'Noto Sans SC',sans-serif;color:#1A1A1A;position:relative;overflow:hidden}
+.serif{font-family:'Noto Serif SC',serif}.mono{font-family:'IBM Plex Mono',monospace}
+.mast{position:absolute;top:110px;left:90px;right:90px;border-top:6px solid #1A1A1A;border-bottom:1px solid #1A1A1A;padding:18px 0;display:flex;justify-content:space-between;font-size:28px}
+.mast b{color:#C8372D}
+.no{position:absolute;top:240px;left:86px;font-size:300px;line-height:1;color:#C8372D;font-family:'Noto Serif SC',serif;font-weight:900}
+h1{position:absolute;top:290px;left:470px;font-size:136px;font-weight:900;line-height:1.05}
+.sub{position:absolute;top:470px;left:476px;font-size:34px;font-style:italic;color:#555}
+.rule{position:absolute;top:610px;left:90px;right:90px;height:1px;background:#1A1A1A}
+.body{position:absolute;top:660px;left:90px;right:90px}
+.line{font-size:56px;line-height:1.8;font-family:'Noto Serif SC',serif}
+.d{border-bottom:4px dotted #C8372D;color:#C8372D;padding:0 4px}
+.ok{background:#1A1A1A;color:#F4EFE6;padding:0 8px}
+.x{color:#999;text-decoration:line-through}
+.note{font-size:28px;color:#555;margin:6px 0 40px}
+.quote{position:absolute;top:1230px;left:90px;right:90px;border-left:8px solid #C8372D;padding:10px 0 10px 36px;font-size:48px;line-height:1.5;font-family:'Noto Serif SC',serif;font-weight:900}
+.chip{position:absolute;top:1460px;left:90px;font-size:26px;color:#555}
+.cap{position:absolute;bottom:250px;left:90px;right:90px;text-align:center;font-size:42px;font-weight:500;padding:20px 0;border-top:1px solid #1A1A1A;border-bottom:1px solid #1A1A1A}
+.foot{position:absolute;bottom:130px;left:90px;right:90px;display:flex;justify-content:space-between;font-size:24px;color:#777}
+</style></head><body>
+<div class="mast serif"><span><b>DeepInfer</b> 拆解</span><span>看家本领 · 第一则</span></div>
+<div class="no">01</div>
+<h1 class="serif">猜着写</h1>
+<div class="sub serif">推测解码 — Speculative Decoding</div>
+<div class="rule"></div>
+<div class="body">
+ <div class="line">今天<span class="d">天气</span><span class="d">真</span><span class="d">不错</span><span class="d">，</span><span class="d">去</span></div>
+ <div class="note">草稿：一口气猜出 5 个 token（红色虚线）</div>
+ <div class="line">今天<span class="ok">天气真不错，</span><span class="x">去</span></div>
+ <div class="note">验证：模型一次看完，留下 4 个，划掉 1 个</div>
+</div>
+<div class="quote">一次验证顶四步，<br>这就是"快"的来源。</div>
+<div class="chip mono">DEEPINFER_ENABLE_MTP_VARLEN=1</div>
+<div class="cap">先打几个草稿 token，再一次性验证</div>
+<div class="foot"><span>github.com/deepseek-ai/DeepInfer</span><span>01 / 03</span></div>
+</body></html>
