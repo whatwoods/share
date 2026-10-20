@@ -60,6 +60,26 @@ svg{overflow:visible}
 .uline{left:84px;top:910px}
 .meta{left:80px;top:960px;display:flex;gap:18px;flex-wrap:wrap;width:920px}
 
+
+/* S1 hook */
+.rain{position:absolute;inset:0;opacity:0;opacity:.32;animation:fo .4s ease var(--l1) forwards;-webkit-mask-image:linear-gradient(transparent,#000 25%,#000 75%,transparent)}
+.rc{position:absolute;top:0;width:120px;font-size:22px;line-height:1.9;color:#8FA2FF;white-space:nowrap;animation:rainup 1.8s linear infinite;animation-delay:calc(var(--l0) - 1.1s - var(--rs))}
+@keyframes rainup{from{transform:translateY(1920px)}to{transform:translateY(-900px)}}
+.gear{left:190px;top:560px;opacity:0;animation:gearin .5s var(--e) calc(var(--l0) + 1.25s) both, spin 6s linear calc(var(--l0) + 1.25s) infinite, fo .4s ease var(--l1) forwards}
+@keyframes gearin{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+@keyframes spin{from{rotate:0deg}to{rotate:360deg}}
+.kin{position:absolute;left:0;right:0;top:560px;height:700px;text-align:center;animation:fo .35s ease var(--l1) forwards}
+.kin>div{position:absolute;left:0;right:0}
+.k1{top:40px;font-size:96px;font-weight:700;animation:slam .35s var(--e) calc(var(--l0) + .05s) both}
+.k2{top:170px;font-size:60px;font-weight:700;color:var(--dim);animation:fu .35s var(--e) calc(var(--l0) + .6s) both}
+.k3{top:250px;font-size:230px;font-weight:900;line-height:1.1;color:#fff;text-shadow:0 0 60px rgba(77,107,254,.9),0 0 20px rgba(77,107,254,.9);animation:slam .4s var(--e) calc(var(--l0) + 1.25s) both}
+.k4{top:700px;animation:stamp .35s cubic-bezier(.2,1.4,.4,1) calc(var(--l0) + 2.15s) both}
+.k4 span{display:inline-block;font-size:120px;font-weight:900;color:var(--mint);border:8px solid var(--mint);border-radius:22px;padding:0 40px;background:rgba(11,14,20,.85);box-shadow:0 0 50px rgba(61,220,151,.5)}
+@keyframes slam{from{opacity:0;transform:scale(1.7)}to{opacity:1;transform:none}}
+@keyframes stamp{from{opacity:0;transform:scale(2.2) rotate(-8deg)}to{opacity:1;transform:rotate(-4deg)}}
+.flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;animation:flash .45s ease-out calc(var(--l0) + 2.15s) both}
+@keyframes flash{0%{opacity:0}15%{opacity:.55}100%{opacity:0}}
+
 /* S2 */
 .file{left:80px;top:420px;width:380px;height:190px;display:flex;align-items:center;gap:26px;padding:0 30px}
 .file .t{font-size:34px;font-weight:700}.file .s{font-size:22px;color:var(--dim);margin-top:6px}
@@ -143,17 +163,26 @@ animation:ldin .6s var(--e) var(--l2) both, lev .8s var(--e) calc(var(--l4) + .1
 
 <!-- S1 HOOK -->
 <section class="sc" id="s1"><div class="cam">
- <div class="hd"><i>2026.10.20</i><b>开源</b></div>
- <div class="abs box term mono">
-  <div class="ln" style="--o:.2s"><span class="pr">$</span> git clone deepseek-ai/DeepInfer</div>
-  <div class="ln" style="--o:1.3s;color:#6E7681">Cloning into 'DeepInfer'... done.</div>
+ <div class="rain"><div class="rc mono" style="left:40px;--rs:0.00s;animation-duration:1.60s">你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms</div><div class="rc mono" style="left:170px;--rs:0.15s;animation-duration:1.95s">{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出</div><div class="rc mono" style="left:300px;--rs:0.30s;animation-duration:2.30s">的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}</div><div class="rc mono" style="left:430px;--rs:0.00s;animation-duration:2.65s">Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token</div><div class="rc mono" style="left:560px;--rs:0.15s;animation-duration:1.60s">中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}</div><div class="rc mono" style="left:690px;--rs:0.30s;animation-duration:1.95s">stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这</div><div class="rc mono" style="left:820px;--rs:0.00s;animation-duration:2.30s">时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token</div><div class="rc mono" style="left:950px;--rs:0.15s;animation-duration:2.65s">data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他<br>stream: true ▍ 200 OK ▍ 13ms<br>时 来 用 们 生 到 作 地 于 出<br>data: {"content":"答"}<br>你好 世界 的 了 是 在 推理 token<br>{"id":42,"delta":"好"}<br>的 一 是 在 不 了 有 和 人 这<br>Hello ▍ world ▍ infer ▍ token<br>中 大 为 上 个 国 我 以 要 他</div></div>
+ <svg class="abs gear" width="700" height="700" viewBox="0 0 700 700" fill="none"><circle cx="350" cy="350" r="280" stroke="#4D6BFE" stroke-width="46" stroke-dasharray="34 26" opacity=".55"/><circle cx="350" cy="350" r="200" stroke="#8FA2FF" stroke-width="3" opacity=".6"/><circle cx="350" cy="350" r="60" stroke="#8FA2FF" stroke-width="3" opacity=".6"/></svg>
+ <div class="kin">
+  <div class="k1 mono">DeepSeek</div>
+  <div class="k2">自家 API 背后的</div>
+  <div class="k3">发动机</div>
+  <div class="k4"><span>开源了</span></div>
  </div>
- <div class="abs word mono w" style="--o:1.6s">Deep<span>Infer</span></div>
- <svg class="abs uline" width="912" height="6"><line class="dr" pathLength="1" x1="0" y1="3" x2="912" y2="3" stroke="#4D6BFE" stroke-width="6" style="--o:2s"/></svg>
+ <div class="flash"></div>
+ <div class="hd" style="animation-delay:var(--l1)"><i>2026.10.20</i><b>开源</b></div>
+ <div class="abs box term mono" style="opacity:0;animation:fu .4s var(--e) var(--l1) both">
+  <div class="ln" style="--a:var(--l1);--o:.1s"><span class="pr">$</span> git clone deepseek-ai/DeepInfer</div>
+  <div class="ln" style="--a:var(--l1);--o:.9s;color:#6E7681">Cloning into 'DeepInfer'... done.</div>
+ </div>
+ <div class="abs word mono w" style="--a:var(--l1);--o:.5s">Deep<span>Infer</span></div>
+ <svg class="abs uline" width="912" height="6"><line class="dr" pathLength="1" x1="0" y1="3" x2="912" y2="3" stroke="#4D6BFE" stroke-width="6" style="--a:var(--l1);--o:.9s"/></svg>
  <div class="abs meta">
-  <span class="pill mono f" style="--a:var(--l1);--o:.1s">Apache-2.0</span>
-  <span class="pill f" style="--a:var(--l1);--o:.6s;border-color:#3DDC97;color:#3DDC97">可商用</span>
-  <span class="pill f" style="--a:var(--l1);--o:1.1s">线上服务同款</span>
+  <span class="pill mono f" style="--a:var(--l1);--o:1.3s">Apache-2.0</span>
+  <span class="pill f" style="--a:var(--l1);--o:1.6s;border-color:#3DDC97;color:#3DDC97">可商用</span>
+  <span class="pill f" style="--a:var(--l1);--o:1.9s">线上服务同款</span>
  </div>
 </div></section>
 
@@ -283,7 +312,7 @@ animation:ldin .6s var(--e) var(--l2) both, lev .8s var(--e) calc(var(--l4) + .1
 <script>
 // ===== Script: [[x]] = highlight. Timing derived from reading speed. =====
 const SCRIPT={
- s1:["DeepSeek 又开源了，这回给的不是模型，","是它自己线上一直在跑的那套[[推理框架]]，DeepInfer。"],
+ s1:["!DeepSeek 把自家 API 背后的[[发动机]]，开源了。","不是模型，是让模型[[又快又省]]的推理框架。"],
  s2:["推理框架是干嘛的？","模型训完，就是一堆[[参数文件]]，躺在硬盘里不会说话。","几万人同时来提问，得有人把请求[[打包排队]]，","再把模型拆到几十张卡上，一张都别闲着。","同一个模型，这活儿干得好不好，[[成本]]能差出一大截。"],
  s4:["先说最妙的一招，[[推测解码]]。","大模型说话像挤牙膏，一次一个词，每挤一下，整个模型都得[[跑一遍]]。","DeepInfer 干脆先把后面几个词[[猜出来]]，","再让大模型一口气批改，对的留下，错的当场改掉。","跑一遍，就能[[出好几个词]]。"],
  s5:["再说[[专家并行]]。","DeepSeek 肚子里有一大群专家，每个词只叫醒其中几个。","可总有几个[[红人专家]]忙不过来，它那张卡被挤爆，别的卡却在摸鱼。","解法挺朴素，红人[[多复制几份]]，","分到闲着的卡上，大家[[一样忙]]。"],
@@ -294,12 +323,12 @@ const SCRIPT={
 };
 const CPS=5.8; // chars per second
 function dur(t){t=t.replace(/\[\[|\]\]/g,'');const cjk=(t.match(/[一-鿿]/g)||[]).length;const words=(t.match(/[A-Za-z0-9.\-]+/g)||[]).length;const p=(t.match(/[，。；：、,]/g)||[]).length;return Math.max(1.6,(cjk+words*2.2+p*.6)/CPS+.15)}
-let T=.3;const caps=document.getElementById('caps');const timeline=[];
+let T=.1;const caps=document.getElementById('caps');const timeline=[];
 for(const [id,lines] of Object.entries(SCRIPT)){
  const sec=document.getElementById(id);const s0=T;
- lines.forEach((ln,i)=>{const d=dur(ln);sec.style.setProperty('--l'+i,T.toFixed(2)+'s');
+ lines.forEach((ln,i)=>{const nocap=ln[0]==='!';ln=ln.replace(/^!/,'');const d=dur(ln);sec.style.setProperty('--l'+i,T.toFixed(2)+'s');
   const c=document.createElement('div');c.className='cap';c.style.setProperty('--s',T.toFixed(2)+'s');c.style.setProperty('--d',d.toFixed(2)+'s');
-  c.innerHTML='<span>'+ln.replace(/\[\[(.+?)\]\]/g,'<b>$1</b>')+'</span>';caps.appendChild(c);timeline.push({id,t:T,d,text:ln.replace(/\[\[|\]\]/g,'')});T+=d;});
+  c.innerHTML='<span>'+ln.replace(/\[\[(.+?)\]\]/g,'<b>$1</b>')+'</span>';if(!nocap)caps.appendChild(c);timeline.push({id,t:T,d,text:ln.replace(/\[\[|\]\]/g,'')});T+=d;});
  for(let i=lines.length;i<6;i++)sec.style.setProperty('--l'+i,T.toFixed(2)+'s');
  T+=.3; sec.style.setProperty('--s',(s0-.2).toFixed(2)+'s');sec.style.setProperty('--d',(T-s0+.2).toFixed(2)+'s');
 }
