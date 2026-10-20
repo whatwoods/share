@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="zh"><head><meta charset="utf-8">
+<title>DeepInfer 动态样片</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@500;900&family=JetBrains+Mono:wght@500;700&display=block" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0D1117;--blue:#4D6BFE;--blue2:#8FA2FF;--mint:#3DDC97;--coral:#FF6B6B;--amber:#F2A93B;--fg:#E6EDF3;--dim:#6E7681;--line:#30363D;
+--bounce:cubic-bezier(.34,1.56,.64,1);--out:cubic-bezier(.22,1,.36,1)}
+html,body{background:#000}
+#stage{width:1080px;height:1920px;position:relative;overflow:hidden;background:var(--bg);font-family:'Noto Sans SC',sans-serif;color:var(--fg)}
+.grid{position:absolute;inset:0;background-image:radial-gradient(rgba(110,118,129,.22) 2px,transparent 2px);background-size:40px 40px}
+.blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.45}
+.b1{width:700px;height:700px;background:#4D6BFE;left:-200px;top:200px;animation:drift1 18s ease-in-out infinite alternate}
+.b2{width:600px;height:600px;background:#8A5CF6;right:-220px;top:1100px;opacity:.3;animation:drift2 22s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(260px,380px)}}
+@keyframes drift2{to{transform:translate(-300px,-420px)}}
+.mono{font-family:'JetBrains Mono',monospace}
+svg{overflow:visible}
+
+/* scene shell */
+.sc{position:absolute;inset:0;opacity:0;animation:scene var(--d) linear var(--s) both}
+@keyframes scene{0%{opacity:0}3%{opacity:1}97%{opacity:1}100%{opacity:0}}
+.ttl{position:absolute;top:150px;left:0;right:0;text-align:center;font-size:120px;font-weight:900;letter-spacing:8px;
+animation:up .7s var(--bounce) var(--s) both;text-shadow:0 0 40px rgba(77,107,254,.5)}
+.abs{position:absolute}
+
+/* captions */
+.cap{position:absolute;bottom:300px;left:0;right:0;text-align:center;opacity:0;animation:scene var(--d) linear var(--s) both}
+.cap span{display:inline-block;background:rgba(0,0,0,.55);padding:18px 34px;font-size:44px;font-weight:500;border-radius:40px;backdrop-filter:blur(6px)}
+#bar{position:absolute;bottom:0;left:0;height:8px;background:linear-gradient(90deg,var(--blue),var(--mint));animation:grow 90s linear both}
+@keyframes grow{from{width:0}to{width:100%}}
+
+/* keyframes */
+@keyframes pop{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes up{from{transform:translateY(60px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes fadeout{to{opacity:0}}
+@keyframes draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+@keyframes pulse{0%,100%{filter:drop-shadow(0 0 10px rgba(77,107,254,.5))}50%{filter:drop-shadow(0 0 40px rgba(77,107,254,1))}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes wobble{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(3deg)}}
+.d{stroke-dasharray:1;stroke-dashoffset:1}
+
+/* ---------- S1 open ---------- */
+.box{left:340px;top:820px;width:400px;height:300px}
+.lid{animation:lidoff 1s var(--out) calc(var(--s) + 1s) both}
+@keyframes lidoff{to{transform:translate(260px,-420px) rotate(40deg);opacity:0}}
+.core{left:390px;top:560px;width:300px;height:300px;animation:rise 1s var(--bounce) calc(var(--s) + 1.2s) both}
+@keyframes rise{from{transform:translateY(380px) scale(.3);opacity:0}to{transform:none;opacity:1}}
+.core svg{animation:pulse 2s ease-in-out infinite}
+.spark{left:540px;top:820px;width:18px;height:18px;border-radius:50%;opacity:0;animation:burst 1.2s var(--out) calc(var(--s) + 1.2s) both}
+@keyframes burst{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--x),var(--y)) scale(.2);opacity:0}}
+.name{left:0;right:0;top:1180px;text-align:center;font-size:96px;font-weight:700;color:var(--blue2);animation:up .7s var(--bounce) calc(var(--s) + 1.8s) both}
+.badge{left:0;right:0;top:1330px;text-align:center;animation:pop .5s var(--bounce) calc(var(--s) + 2.4s) both}
+.badge span{border:2px solid var(--mint);color:var(--mint);border-radius:40px;padding:10px 30px;font-size:34px}
+
+/* ---------- S2 kitchen ---------- */
+.recipe{left:400px;top:400px;animation:pop .6s var(--bounce) calc(var(--s) + .4s) both}
+.chef{animation:pop .5s var(--bounce) var(--at) both}
+.chef>g{animation:bob 1s ease-in-out infinite;transform-box:fill-box}
+.steam{stroke-dasharray:12 10;animation:steam .8s linear infinite}
+@keyframes steam{to{stroke-dashoffset:-44}}
+.plate{left:0;top:0;offset-path:path('M540 1150 C540 1260 200 1260 200 1400');offset-rotate:0deg;opacity:0;animation:fly 1.4s var(--out) var(--at) infinite}
+.plate.r{offset-path:path('M540 1150 C540 1260 880 1260 880 1400')}
+.plate.m{offset-path:path('M540 1150 L540 1400')}
+@keyframes fly{0%{offset-distance:0%;opacity:1}90%{opacity:1}100%{offset-distance:100%;opacity:0}}
+.seat{animation:litup .4s var(--bounce) var(--at) both}
+@keyframes litup{from{fill:#1c2230;transform:scale(.6)}to{fill:var(--mint);transform:scale(1)}}
+.seat{transform-box:fill-box;transform-origin:center}
+.klabel{font-size:40px;font-weight:900}
+
+/* ---------- S3 speculative ---------- */
+.tok{position:absolute;top:620px;height:120px;border-radius:60px;display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:900;
+border:4px dashed var(--blue2);color:var(--blue2);animation:flyin .6s var(--bounce) var(--at) both, ok .35s var(--bounce) var(--ok) forwards}
+@keyframes flyin{from{transform:translateX(500px) scale(.4);opacity:0}to{transform:none;opacity:1}}
+@keyframes ok{0%{transform:scale(1)}50%{transform:scale(1.18)}100%{transform:scale(1);border:4px solid var(--mint);background:var(--mint);color:#0D1117}}
+.tok.bad{animation:flyin .6s var(--bounce) var(--at) both, bad 1s ease var(--ok) forwards}
+@keyframes bad{0%{transform:none}10%{transform:translateX(-14px);border-color:var(--coral);color:var(--coral)}20%{transform:translateX(14px)}30%{transform:translateX(-10px)}40%{transform:translateX(0);border:4px solid var(--coral);color:var(--coral);opacity:1}100%{transform:translateY(260px) rotate(30deg);opacity:0;border:4px solid var(--coral);color:var(--coral)}}
+.tok.ctx{border:4px solid var(--line);color:var(--dim);animation:pop .5s var(--bounce) var(--at) both}
+.beam{position:absolute;top:580px;width:10px;height:200px;border-radius:5px;background:#fff;box-shadow:0 0 30px 10px rgba(143,162,255,.9);opacity:0;
+animation:sweep 1.3s ease-in-out calc(var(--s) + 3s) both}
+@keyframes sweep{0%{left:150px;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:960px;opacity:0}}
+.x4{left:0;right:0;top:820px;text-align:center;font-size:200px;font-weight:900;color:var(--mint);text-shadow:0 0 50px rgba(61,220,151,.6);
+animation:pop .6s var(--bounce) calc(var(--s) + 4.8s) both}
+.lane{position:absolute;left:150px;width:780px;height:90px;border-radius:45px;background:#161B22;overflow:hidden;animation:fade .4s ease calc(var(--s) + 6s) both}
+.lane i{position:absolute;top:15px;width:60px;height:60px;border-radius:30px;opacity:0;animation:pop .3s var(--bounce) var(--at) both}
+.lico{position:absolute;left:60px;width:70px;height:70px;animation:fade .4s ease calc(var(--s) + 6s) both}
+
+/* ---------- S4 experts ---------- */
+.router{left:440px;top:390px;width:200px;height:110px;border-radius:55px;border:4px solid var(--fg);display:flex;align-items:center;justify-content:center;font-size:40px;
+animation:pop .5s var(--bounce) calc(var(--s) + .3s) both}
+.tray{position:absolute;top:620px;height:470px;width:430px;border:3px dashed var(--line);border-radius:28px;animation:fade .5s ease calc(var(--s) + .5s) both}
+.tray b{position:absolute;bottom:-56px;left:0;right:0;text-align:center;font-size:30px;color:var(--dim);font-weight:500}
+.ex{position:absolute;width:170px;height:170px;border-radius:44px;background:#1c2230;border:4px solid var(--line);
+animation:pop .5s var(--bounce) var(--at) both, wake .4s var(--bounce) var(--w) forwards}
+@keyframes wake{0%{transform:scale(1)}50%{transform:scale(1.15)}100%{transform:scale(1);background:var(--blue);border-color:var(--blue2);box-shadow:0 0 40px rgba(77,107,254,.8)}}
+.ex .eye{position:absolute;top:62px;width:26px;height:26px;border-radius:13px;background:var(--dim);transform:scaleY(.18);animation:open .3s ease var(--w) forwards}
+@keyframes open{to{transform:scaleY(1);background:#fff}}
+.ex .eye.l{left:46px}.ex .eye.r{right:46px}
+.ex .mouth{position:absolute;left:65px;top:108px;width:40px;height:20px;border-bottom:5px solid var(--dim);border-radius:0 0 20px 20px;opacity:0;animation:fade .3s ease var(--w) forwards}
+.ex.nw{animation:pop .5s var(--bounce) var(--at) both}
+.ex.nw .eye{animation:none}
+.ball{position:absolute;left:522px;top:430px;width:36px;height:36px;border-radius:18px;background:var(--mint);box-shadow:0 0 20px var(--mint);opacity:0;
+animation:route .9s var(--out) var(--at) both}
+@keyframes route{0%{transform:translate(0,0) scale(.4);opacity:0}15%{opacity:1;transform:translate(0,40px) scale(1)}100%{transform:translate(var(--tx),var(--ty)) scale(.6);opacity:0}}
+.lb{position:absolute;bottom:500px;width:62px;border-radius:14px 14px 4px 4px;height:var(--h0);background:var(--c0);
+animation:pop .4s var(--bounce) calc(var(--s) + 4.6s) both, level .9s var(--bounce) calc(var(--s) + 6.6s) forwards;transform-origin:bottom}
+@keyframes level{to{height:110px;background:var(--mint)}}
+.eplb{left:0;right:0;top:1450px;text-align:center;animation:pop .5s var(--bounce) calc(var(--s) + 7.4s) both}
+.eplb span{background:var(--mint);color:#0D1117;border-radius:40px;padding:10px 34px;font-size:40px;font-weight:900}
+
+/* ---------- S5 deterministic ---------- */
+.reel{position:absolute;top:560px;width:380px;height:170px;border-radius:28px;border:4px solid var(--blue2);overflow:hidden;background:#161B22;
+animation:pop .5s var(--bounce) calc(var(--s) + .2s) both}
+.reel .col{animation:roll 2.6s cubic-bezier(.2,.8,.2,1.06) calc(var(--s) + .6s) both}
+@keyframes roll{from{transform:translateY(0)}to{transform:translateY(-1190px)}}
+.reel .it{height:170px;display:flex;align-items:center;justify-content:center;font-size:52px;font-weight:900;color:var(--dim)}
+.reel .it:last-child{color:var(--fg)}
+.reel.done{animation:pop .5s var(--bounce) calc(var(--s) + .2s) both, glowm .5s ease calc(var(--s) + 3.3s) forwards}
+@keyframes glowm{to{border-color:var(--mint);box-shadow:0 0 40px rgba(61,220,151,.6)}}
+.eq{left:0;right:0;top:560px;text-align:center;font-size:150px;line-height:170px;font-weight:900;color:var(--mint);animation:pop .5s var(--bounce) calc(var(--s) + 3.4s) both}
+.mold{left:150px;top:900px;width:780px;height:420px}
+.brace{font-size:300px;font-weight:500;color:var(--blue2);position:absolute;top:30px;line-height:1;animation:pop .6s var(--bounce) calc(var(--s) + 5s) both}
+.slot{position:absolute;left:150px;width:480px;height:110px;border-radius:24px;border:3px dashed var(--line);animation:fade .4s ease calc(var(--s) + 5.3s) both}
+.blk{position:absolute;left:150px;width:480px;height:110px;border-radius:24px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;
+animation:drop .8s var(--bounce) var(--at) both}
+@keyframes drop{from{transform:translateY(-600px) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
+.json{left:0;right:0;top:1350px;text-align:center;animation:pop .5s var(--bounce) calc(var(--s) + 7.6s) both}
+.json span{border:3px solid var(--mint);color:var(--mint);border-radius:40px;padding:8px 30px;font-size:38px;font-weight:700}
+
+/* ---------- S6 hardware ---------- */
+.hex{left:390px;top:440px;width:300px;height:300px;animation:pop .7s var(--bounce) calc(var(--s) + .3s) both}
+.hex svg{animation:pulse 1.6s ease-in-out infinite}
+.chip{position:absolute;top:1060px;width:300px;height:300px;animation:pop .6s var(--bounce) var(--at) both}
+.chip .glow{animation:chipglow 1.6s ease-in-out var(--g) infinite}
+@keyframes chipglow{0%,100%{opacity:.15}50%{opacity:.9}}
+.chip b{position:absolute;left:0;right:0;top:330px;text-align:center;font-size:48px;font-weight:900}
+.pk{position:absolute;left:0;top:0;width:26px;height:26px;border-radius:13px;offset-rotate:0deg;opacity:0;animation:flow 1.2s linear var(--at) infinite}
+@keyframes flow{0%{offset-distance:0%;opacity:0}10%{opacity:1}90%{opacity:1}100%{offset-distance:100%;opacity:0}}
+.pk.l{offset-path:path('M540 760 C540 900 300 900 300 1050');background:var(--fg);box-shadow:0 0 18px #fff}
+.pk.r{offset-path:path('M540 760 C540 900 780 900 780 1050');background:var(--blue2);box-shadow:0 0 18px var(--blue2)}
+
+/* ---------- S7 limits ---------- */
+.pz{position:absolute;width:330px;height:330px;border-radius:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-size:40px;font-weight:900}
+.pz.have{background:var(--blue);box-shadow:0 0 50px rgba(77,107,254,.6);animation:pop .6s var(--bounce) calc(var(--s) + .4s) both}
+.pz.miss{border:5px dashed var(--amber);color:var(--amber);animation:pop .5s var(--bounce) var(--at) both}
+.pz.miss>div{animation:wobble 1.4s ease-in-out infinite;display:flex;flex-direction:column;align-items:center;gap:16px}
+.qm{font-size:110px;line-height:1}
+.tagz{left:0;right:0;top:1440px;display:flex;justify-content:center;gap:28px}
+.tagz span{border:3px solid var(--line);border-radius:40px;padding:12px 30px;font-size:36px;color:var(--fg);animation:pop .5s var(--bounce) var(--at) both}
+.ttl.amb{text-shadow:0 0 40px rgba(242,169,59,.5);color:var(--amber)}
+
+/* ---------- S8 ending ---------- */
+.house{left:86px;top:430px}
+.door{transform-box:fill-box;transform-origin:left;animation:dooro 1.2s var(--out) calc(var(--s) + 2.2s) both}
+@keyframes dooro{from{transform:scaleX(1)}to{transform:scaleX(.08)}}
+.light{opacity:0;animation:fade 1s ease calc(var(--s) + 2.6s) both}
+.win{animation:winon .4s ease var(--at) both}
+@keyframes winon{from{fill:#161B22}to{fill:var(--blue2)}}
+.curve{left:190px;top:1000px}
+.endt{left:0;right:0;top:1390px;text-align:center;font-size:72px;font-weight:900;animation:up .7s var(--bounce) calc(var(--s) + 6.4s) both}
+.endt em{font-style:normal;color:var(--blue2)}
+</style></head>
+<body><div id="stage">
+<div class="blob b1"></div><div class="blob b2"></div><div class="grid"></div>
+
+<!-- S1 0-5 -->
+<section class="sc" style="--s:0s;--d:5s">
+ <div class="ttl" style="font-size:88px;letter-spacing:2px">DeepSeek 又开源了</div>
+ <div class="abs core"><svg viewBox="0 0 300 300" width="300" height="300"><polygon points="150,10 271,80 271,220 150,290 29,220 29,80" fill="rgba(77,107,254,.25)" stroke="#8FA2FF" stroke-width="8"/><polygon points="150,80 211,115 211,185 150,220 89,185 89,115" fill="#4D6BFE"/></svg></div>
+ <svg class="abs box" viewBox="0 0 400 300" width="400" height="300" style="animation:pop .6s var(--bounce) .1s both, fadeout .5s ease 2s forwards">
+  <rect x="20" y="90" width="360" height="200" rx="24" fill="#161B22" stroke="#E6EDF3" stroke-width="6"/>
+  <line x1="200" y1="90" x2="200" y2="290" stroke="#4D6BFE" stroke-width="10"/>
+  <g class="lid"><rect x="0" y="40" width="400" height="60" rx="18" fill="#1c2230" stroke="#E6EDF3" stroke-width="6"/><line x1="200" y1="40" x2="200" y2="100" stroke="#4D6BFE" stroke-width="10"/><path d="M200 40 C160 0 130 10 150 40 M200 40 C240 0 270 10 250 40" fill="none" stroke="#4D6BFE" stroke-width="8"/></g>
+ </svg>
+ <i class="abs spark" style="--x:-300px;--y:-240px;background:#3DDC97"></i><i class="abs spark" style="--x:300px;--y:-240px;background:#8FA2FF"></i>
+ <i class="abs spark" style="--x:-380px;--y:20px;background:#8FA2FF"></i><i class="abs spark" style="--x:380px;--y:40px;background:#3DDC97"></i>
+ <i class="abs spark" style="--x:-180px;--y:-380px;background:#F2A93B"></i><i class="abs spark" style="--x:200px;--y:-380px;background:#FF6B6B"></i>
+ <i class="abs spark" style="--x:-260px;--y:220px;background:#FF6B6B"></i><i class="abs spark" style="--x:260px;--y:220px;background:#F2A93B"></i>
+ <div class="abs name mono">DeepInfer</div>
+ <div class="abs badge"><span class="mono">Apache 2.0 · 开源</span></div>
+</section>
+
+<!-- S2 5-20 -->
+<section class="sc" style="--s:5s;--d:15s">
+ <div class="ttl">菜谱 × 后厨</div>
+ <svg class="abs recipe" width="280" height="220" viewBox="0 0 280 220">
+  <rect x="40" y="10" width="200" height="180" rx="18" fill="#161B22" stroke="#E6EDF3" stroke-width="6"/>
+  <line x1="80" y1="60" x2="200" y2="60" stroke="#6E7681" stroke-width="8" stroke-linecap="round"/><line x1="80" y1="100" x2="200" y2="100" stroke="#6E7681" stroke-width="8" stroke-linecap="round"/><line x1="80" y1="140" x2="160" y2="140" stroke="#6E7681" stroke-width="8" stroke-linecap="round"/>
+  <text x="140" y="250" text-anchor="middle" class="klabel" fill="#E6EDF3">模型</text>
+ </svg>
+ <svg class="abs" style="left:0;top:0" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <path d="M540 680 L540 780" class="d" pathLength="1" stroke="#8FA2FF" stroke-width="6" fill="none" style="animation:draw .5s ease calc(5s + 1.2s) forwards"/>
+  <!-- kitchen counter -->
+  <g style="animation:pop .6s var(--bounce) calc(5s + 1.6s) both;transform-origin:540px 960px">
+   <rect x="170" y="800" width="740" height="350" rx="40" fill="rgba(77,107,254,.12)" stroke="#4D6BFE" stroke-width="6"/>
+   <rect x="170" y="1050" width="740" height="100" rx="0" fill="#4D6BFE" opacity=".35"/>
+  </g>
+  <!-- chefs -->
+  <g class="chef" style="--at:calc(5s + 2.2s);transform-origin:330px 960px"><g>
+   <circle cx="330" cy="975" r="62" fill="#E6EDF3"/><rect x="285" y="880" width="90" height="50" rx="16" fill="#fff"/><circle cx="300" cy="880" r="26" fill="#fff"/><circle cx="330" cy="868" r="30" fill="#fff"/><circle cx="360" cy="880" r="26" fill="#fff"/>
+   <circle cx="310" cy="970" r="8" fill="#0D1117"/><circle cx="350" cy="970" r="8" fill="#0D1117"/><path d="M312 995 Q330 1010 348 995" stroke="#0D1117" stroke-width="5" fill="none" stroke-linecap="round"/></g></g>
+  <g class="chef" style="--at:calc(5s + 2.4s);transform-origin:540px 960px"><g style="animation-delay:-.33s">
+   <circle cx="540" cy="975" r="62" fill="#E6EDF3"/><rect x="495" y="880" width="90" height="50" rx="16" fill="#fff"/><circle cx="510" cy="880" r="26" fill="#fff"/><circle cx="540" cy="868" r="30" fill="#fff"/><circle cx="570" cy="880" r="26" fill="#fff"/>
+   <circle cx="520" cy="970" r="8" fill="#0D1117"/><circle cx="560" cy="970" r="8" fill="#0D1117"/><path d="M522 995 Q540 1010 558 995" stroke="#0D1117" stroke-width="5" fill="none" stroke-linecap="round"/></g></g>
+  <g class="chef" style="--at:calc(5s + 2.6s);transform-origin:750px 960px"><g style="animation-delay:-.66s">
+   <circle cx="750" cy="975" r="62" fill="#E6EDF3"/><rect x="705" y="880" width="90" height="50" rx="16" fill="#fff"/><circle cx="720" cy="880" r="26" fill="#fff"/><circle cx="750" cy="868" r="30" fill="#fff"/><circle cx="780" cy="880" r="26" fill="#fff"/>
+   <circle cx="730" cy="970" r="8" fill="#0D1117"/><circle cx="770" cy="970" r="8" fill="#0D1117"/><path d="M732 995 Q750 1010 768 995" stroke="#0D1117" stroke-width="5" fill="none" stroke-linecap="round"/></g></g>
+  <!-- pots & steam -->
+  <g style="animation:fade .4s ease calc(5s + 2.8s) both">
+   <rect x="280" y="1060" width="100" height="60" rx="12" fill="#0D1117" stroke="#E6EDF3" stroke-width="5"/><rect x="490" y="1060" width="100" height="60" rx="12" fill="#0D1117" stroke="#E6EDF3" stroke-width="5"/><rect x="700" y="1060" width="100" height="60" rx="12" fill="#0D1117" stroke="#E6EDF3" stroke-width="5"/>
+  </g>
+  <g fill="none" stroke="#8FA2FF" stroke-width="5" stroke-linecap="round" style="animation:fade .4s ease calc(5s + 3s) both" opacity=".8">
+   <path class="steam" d="M415 1110 q12 -20 0 -40 q-12 -20 0 -40"/><path class="steam" d="M625 1110 q12 -20 0 -40 q-12 -20 0 -40"/><path class="steam" d="M835 1110 q12 -20 0 -40 q-12 -20 0 -40"/>
+  </g>
+  <text x="540" y="1220" text-anchor="middle" class="klabel" fill="#8FA2FF" style="animation:fade .4s ease calc(5s + 3.2s) both">推理框架</text>
+  <!-- seats -->
+  <g>
+   <circle class="seat" cx="200" cy="1420" r="34" style="--at:calc(5s + 6.6s)"/><circle class="seat" cx="310" cy="1420" r="34" style="--at:calc(5s + 7.2s)"/><circle class="seat" cx="430" cy="1420" r="34" style="--at:calc(5s + 7.8s)"/><circle class="seat" cx="540" cy="1420" r="34" style="--at:calc(5s + 6.9s)"/>
+   <circle class="seat" cx="650" cy="1420" r="34" style="--at:calc(5s + 8.4s)"/><circle class="seat" cx="770" cy="1420" r="34" style="--at:calc(5s + 7.5s)"/><circle class="seat" cx="880" cy="1420" r="34" style="--at:calc(5s + 9s)"/>
+  </g>
+ </svg>
+ <svg class="abs plate" width="60" height="30" style="--at:calc(5s + 5.4s)"><ellipse cx="30" cy="15" rx="28" ry="12" fill="#fff"/></svg>
+ <svg class="abs plate m" width="60" height="30" style="--at:calc(5s + 5.9s)"><ellipse cx="30" cy="15" rx="28" ry="12" fill="#fff"/></svg>
+ <svg class="abs plate r" width="60" height="30" style="--at:calc(5s + 6.4s)"><ellipse cx="30" cy="15" rx="28" ry="12" fill="#fff"/></svg>
+</section>
+
+<!-- S3 20-30 -->
+<section class="sc" style="--s:20s;--d:10s">
+ <div class="ttl">猜着写</div>
+ <div class="tok ctx" style="left:60px;width:170px;--at:20.3s">今天</div>
+ <div class="tok" style="left:250px;width:170px;--at:20.8s;--ok:23.25s">天气</div>
+ <div class="tok" style="left:440px;width:120px;--at:21s;--ok:23.5s">真</div>
+ <div class="tok" style="left:580px;width:170px;--at:21.2s;--ok:23.75s">不错</div>
+ <div class="tok" style="left:770px;width:100px;--at:21.4s;--ok:24s">，</div>
+ <div class="tok bad" style="left:890px;width:120px;--at:21.6s;--ok:24.25s">去</div>
+ <div class="beam"></div>
+ <div class="abs x4 mono">×4</div>
+ <svg class="lico" style="top:1130px;--s:20s" viewBox="0 0 70 70"><circle cx="35" cy="35" r="30" fill="none" stroke="#6E7681" stroke-width="6"/><path d="M35 18 V35 L46 44" stroke="#6E7681" stroke-width="6" fill="none" stroke-linecap="round"/></svg>
+ <div class="lane" style="top:1120px">
+  <i style="left:15px;background:#6E7681;--at:26.4s"></i><i style="left:85px;background:#6E7681;--at:27.2s"></i><i style="left:155px;background:#6E7681;--at:28s"></i><i style="left:225px;background:#6E7681;--at:28.8s"></i>
+ </div>
+ <svg class="lico" style="top:1260px" viewBox="0 0 70 70"><path d="M40 4 L14 40 H34 L28 66 L56 28 H36 Z" fill="#3DDC97"/></svg>
+ <div class="lane" style="top:1250px">
+  <i style="left:15px;background:#3DDC97;--at:26.4s"></i><i style="left:85px;background:#3DDC97;--at:26.4s"></i><i style="left:155px;background:#3DDC97;--at:26.4s"></i><i style="left:225px;background:#3DDC97;--at:26.4s"></i>
+  <i style="left:295px;background:#3DDC97;--at:27.2s"></i><i style="left:365px;background:#3DDC97;--at:27.2s"></i><i style="left:435px;background:#3DDC97;--at:27.2s"></i><i style="left:505px;background:#3DDC97;--at:27.2s"></i>
+  <i style="left:575px;background:#3DDC97;--at:28s"></i><i style="left:645px;background:#3DDC97;--at:28s"></i><i style="left:715px;background:#3DDC97;--at:28s"></i>
+ </div>
+</section>
+
+<!-- S4 30-40 -->
+<section class="sc" style="--s:30s;--d:10s">
+ <div class="ttl">专家分工</div>
+ <div class="abs router mono">token</div>
+ <div class="tray" style="left:95px"><b class="mono">GPU 0</b></div>
+ <div class="tray" style="left:555px"><b class="mono">GPU 1</b></div>
+ <!-- experts: cols x=125,325,585,785 ; rows y=870,1090 -->
+ <div class="ex nw" style="left:125px;top:660px;--at:30.6s"><i class="eye l"></i><i class="eye r"></i></div>
+ <div class="ex" style="left:325px;top:660px;--at:30.7s;--w:31.8s"><i class="eye l"></i><i class="eye r"></i><i class="mouth"></i></div>
+ <div class="ex nw" style="left:585px;top:660px;--at:30.8s"><i class="eye l"></i><i class="eye r"></i></div>
+ <div class="ex" style="left:785px;top:660px;--at:30.9s;--w:34.2s"><i class="eye l"></i><i class="eye r"></i><i class="mouth"></i></div>
+ <div class="ex" style="left:125px;top:880px;--at:31s;--w:32.4s"><i class="eye l"></i><i class="eye r"></i><i class="mouth"></i></div>
+ <div class="ex nw" style="left:325px;top:880px;--at:31.1s"><i class="eye l"></i><i class="eye r"></i></div>
+ <div class="ex" style="left:585px;top:880px;--at:31.2s;--w:33s"><i class="eye l"></i><i class="eye r"></i><i class="mouth"></i></div>
+ <div class="ex nw" style="left:785px;top:880px;--at:31.3s"><i class="eye l"></i><i class="eye r"></i></div>
+ <!-- balls: start center (540,658) → expert centers -->
+ <i class="ball" style="--at:31s;--tx:-130px;--ty:297px"></i>
+ <i class="ball" style="--at:31.6s;--tx:-330px;--ty:517px"></i>
+ <i class="ball" style="--at:32.2s;--tx:130px;--ty:517px"></i>
+ <i class="ball" style="--at:32.8s;--tx:-130px;--ty:297px"></i>
+ <i class="ball" style="--at:33.4s;--tx:330px;--ty:297px"></i>
+ <i class="ball" style="--at:34s;--tx:130px;--ty:517px"></i>
+ <!-- load bars (bottom 560 => base y 1360) -->
+ <i class="lb" style="left:135px;--h0:40px;--c0:#6E7681"></i><i class="lb" style="left:215px;--h0:200px;--c0:#FF6B6B"></i>
+ <i class="lb" style="left:335px;--h0:30px;--c0:#6E7681"></i><i class="lb" style="left:415px;--h0:70px;--c0:#6E7681"></i>
+ <i class="lb" style="left:595px;--h0:180px;--c0:#FF6B6B"></i><i class="lb" style="left:675px;--h0:25px;--c0:#6E7681"></i>
+ <i class="lb" style="left:795px;--h0:90px;--c0:#6E7681"></i><i class="lb" style="left:875px;--h0:45px;--c0:#6E7681"></i>
+ <div class="abs eplb"><span>一样忙</span></div>
+</section>
+
+<!-- S5 40-50 -->
+<section class="sc" style="--s:40s;--d:10s">
+ <div class="ttl">说到做到</div>
+ <div class="reel done" style="left:80px"><div class="col"><div class="it">北京 18°</div><div class="it">上海 21°</div><div class="it">深圳 27°</div><div class="it">成都 16°</div><div class="it">武汉 20°</div><div class="it">西安 15°</div><div class="it">南京 19°</div><div class="it">杭州 23°</div></div></div>
+ <div class="abs eq">=</div>
+ <div class="reel done" style="right:80px"><div class="col" style="animation-duration:2.9s"><div class="it">广州 28°</div><div class="it">天津 17°</div><div class="it">重庆 22°</div><div class="it">苏州 20°</div><div class="it">青岛 16°</div><div class="it">长沙 21°</div><div class="it">厦门 25°</div><div class="it">杭州 23°</div></div></div>
+ <div class="abs mold">
+  <div class="brace mono" style="left:0">{</div><div class="brace mono" style="right:0">}</div>
+  <div class="slot" style="top:80px"></div><div class="slot" style="top:230px"></div>
+  <div class="blk mono" style="top:80px;--at:46s">"city": "杭州"</div>
+  <div class="blk mono" style="top:230px;--at:46.7s;background:#8A5CF6">"temp": 23</div>
+ </div>
+ <div class="abs json"><span class="mono">✓ JSON</span></div>
+</section>
+
+<!-- S6 50-65 -->
+<section class="sc" style="--s:50s;--d:15s">
+ <div class="ttl">两条腿走路</div>
+ <div class="abs hex"><svg viewBox="0 0 300 300" width="300" height="300"><polygon points="150,10 271,80 271,220 150,290 29,220 29,80" fill="rgba(77,107,254,.25)" stroke="#8FA2FF" stroke-width="8"/><polygon points="150,80 211,115 211,185 150,220 89,185 89,115" fill="#4D6BFE"/></svg></div>
+ <svg class="abs" style="left:0;top:0" width="1080" height="1920" viewBox="0 0 1080 1920" fill="none" stroke-width="6">
+  <path d="M540 760 C540 900 300 900 300 1050" class="d" pathLength="1" stroke="#6E7681" style="animation:draw .8s ease 51.2s forwards"/>
+  <path d="M540 760 C540 900 780 900 780 1050" class="d" pathLength="1" stroke="#6E7681" style="animation:draw .8s ease 51.2s forwards"/>
+ </svg>
+ <div class="chip" style="left:150px;--at:51.8s;--g:52.4s">
+  <svg viewBox="0 0 300 300" width="300" height="300"><rect class="glow" x="10" y="10" width="280" height="280" rx="40" fill="#E6EDF3" filter="blur(20px)"/>
+   <rect x="50" y="50" width="200" height="200" rx="28" fill="#161B22" stroke="#E6EDF3" stroke-width="8"/><rect x="100" y="100" width="100" height="100" rx="12" fill="#E6EDF3"/>
+   <g stroke="#E6EDF3" stroke-width="8" stroke-linecap="round"><path d="M100 50V20M150 50V20M200 50V20M100 250V280M150 250V280M200 250V280M50 100H20M50 150H20M50 200H20M250 100H280M250 150H280M250 200H280"/></g></svg>
+  <b class="mono">NVIDIA</b></div>
+ <div class="chip" style="left:630px;--at:52s;--g:53.2s">
+  <svg viewBox="0 0 300 300" width="300" height="300"><rect class="glow" x="10" y="10" width="280" height="280" rx="40" fill="#4D6BFE" filter="blur(20px)"/>
+   <rect x="50" y="50" width="200" height="200" rx="28" fill="#161B22" stroke="#8FA2FF" stroke-width="8"/><rect x="100" y="100" width="100" height="100" rx="12" fill="#4D6BFE"/>
+   <g stroke="#8FA2FF" stroke-width="8" stroke-linecap="round"><path d="M100 50V20M150 50V20M200 50V20M100 250V280M150 250V280M200 250V280M50 100H20M50 150H20M50 200H20M250 100H280M250 150H280M250 200H280"/></g></svg>
+  <b style="color:#8FA2FF">昇腾</b></div>
+ <i class="pk l" style="--at:52.2s"></i><i class="pk l" style="--at:52.6s"></i><i class="pk l" style="--at:53s"></i>
+ <i class="pk r" style="--at:52.4s"></i><i class="pk r" style="--at:52.8s"></i><i class="pk r" style="--at:53.2s"></i>
+</section>
+
+<!-- S7 65-80 -->
+<section class="sc" style="--s:65s;--d:15s">
+ <div class="ttl amb">还缺几块</div>
+ <div class="pz have" style="left:195px;top:470px">
+  <svg width="110" height="110" viewBox="0 0 300 300"><polygon points="150,10 271,80 271,220 150,290 29,220 29,80" fill="none" stroke="#fff" stroke-width="20"/><polygon points="150,80 211,115 211,185 150,220 89,185 89,115" fill="#fff"/></svg>引擎</div>
+ <div class="pz miss" style="left:555px;top:470px;--at:66.4s"><div><span class="qm mono">?</span>KV 缓存</div></div>
+ <div class="pz miss" style="left:195px;top:830px;--at:66.9s"><div style="animation-delay:-.5s"><span class="qm mono">?</span>PD 分离</div></div>
+ <div class="pz miss" style="left:555px;top:830px;--at:67.4s"><div style="animation-delay:-1s"><span class="qm mono">?</span>负载均衡</div></div>
+ <div class="abs tagz" style="top:1250px"><span class="mono" style="--at:70s">V4.1-Flash</span><span class="mono" style="--at:70.5s">基于 vLLM</span></div>
+</section>
+
+<!-- S8 80-90 -->
+<section class="sc" style="--s:80s;--d:10s">
+ <svg class="abs house" width="908" height="560" viewBox="0 0 908 560" fill="none" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+  <defs><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE9A8" stop-opacity=".9"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></linearGradient></defs>
+  <polygon class="light" points="384,520 524,520 760,560 148,560" fill="url(#lg)"/>
+  <polyline class="d" pathLength="1" points="40,220 454,40 868,220" stroke="#E6EDF3" style="animation:draw 1s ease 80.2s forwards"/>
+  <rect class="d" pathLength="1" x="90" y="200" width="728" height="320" stroke="#E6EDF3" style="animation:draw 1.2s ease 80.6s forwards"/>
+  <rect class="win" x="140" y="260" width="110" height="80" rx="10" style="--at:83.2s" stroke="#8FA2FF" stroke-width="4"/>
+  <rect class="win" x="290" y="260" width="110" height="80" rx="10" style="--at:83.5s" stroke="#8FA2FF" stroke-width="4"/>
+  <rect class="win" x="508" y="260" width="110" height="80" rx="10" style="--at:83.8s" stroke="#8FA2FF" stroke-width="4"/>
+  <rect class="win" x="658" y="260" width="110" height="80" rx="10" style="--at:84.1s" stroke="#8FA2FF" stroke-width="4"/>
+  <rect x="384" y="380" width="140" height="140" fill="#FFE9A8" stroke="none" style="animation:fade .5s ease 81.8s both"/>
+  <rect class="door" x="384" y="380" width="140" height="140" fill="#4D6BFE" stroke="#8FA2FF" stroke-width="4" style="opacity:0;animation:fade .3s ease 81.8s forwards, dooro 1.2s var(--out) 82.2s forwards"/>
+ </svg>
+ <svg class="abs curve" width="700" height="340" viewBox="0 0 700 340" fill="none" stroke-linecap="round">
+  <path d="M20 20 V320 H680" stroke="#30363D" stroke-width="6" style="animation:fade .4s ease 84.4s both"/>
+  <path class="d" pathLength="1" d="M40 50 C200 60 260 200 400 230 S600 280 660 290" stroke="#3DDC97" stroke-width="10" style="animation:draw 1.4s var(--out) 84.6s forwards"/>
+  <circle cx="660" cy="290" r="16" fill="#3DDC97" style="animation:pop .4s var(--bounce) 86s both;transform-origin:660px 290px"/>
+  <text x="60" y="30" font-size="40" font-weight="900" fill="#6E7681" font-family="Noto Sans SC" style="animation:fade .4s ease 84.4s both">成本</text>
+ </svg>
+ <div class="abs endt">后厨的门，<em>打开了</em></div>
+</section>
+
+<!-- captions -->
+<div class="cap" style="--s:.3s;--d:4.6s"><span>DeepSeek 把线上用的推理框架开源了</span></div>
+<div class="cap" style="--s:5.3s;--d:7s"><span>模型是菜谱，推理框架是后厨</span></div>
+<div class="cap" style="--s:12.5s;--d:7.3s"><span>以前只给菜谱，现在后厨也开放了</span></div>
+<div class="cap" style="--s:20.3s;--d:9.5s"><span>先猜几个词，再一次性验证</span></div>
+<div class="cap" style="--s:30.3s;--d:9.5s"><span>每个词只叫醒几位专家，还要人人一样忙</span></div>
+<div class="cap" style="--s:40.3s;--d:9.5s"><span>同样输入一字不差，还能按 JSON 输出</span></div>
+<div class="cap" style="--s:50.3s;--d:14.5s"><span>英伟达和昇腾，官方同时支持</span></div>
+<div class="cap" style="--s:65.3s;--d:14.5s"><span>只开源了离线推理，还搭不出完整服务</span></div>
+<div class="cap" style="--s:80.3s;--d:9.5s"><span>推理成本，要继续往下走了</span></div>
+<div id="bar"></div>
+</div>
+<script>
+// Fit stage to window for live preview; ?t=SECONDS seeks; render mode is driven externally via window.seek
+const st=document.getElementById('stage');
+function fit(){if(window.__render)return;const s=Math.min(innerWidth/1080,innerHeight/1920);st.style.transform=`scale(${s})`;st.style.transformOrigin='0 0';document.body.style.height=1920*s+'px'}
+addEventListener('resize',fit);fit();
+window.seek=t=>{document.getAnimations().forEach(a=>{a.pause();a.currentTime=t*1000})};
+document.addEventListener('click',()=>{document.getAnimations().forEach(a=>{a.currentTime=0;a.play()})});
+</script>
+</body></html>
